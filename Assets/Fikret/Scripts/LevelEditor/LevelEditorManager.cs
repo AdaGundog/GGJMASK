@@ -144,5 +144,43 @@ namespace LevelEditor
                 Debug.Log("Bölüm Yüklendi!");
             }
         }
+        // --- GÖRSEL YARDIMCILAR (GIZMOS) ---
+        private void OnDrawGizmos()
+        {
+            // Sadece Edit Mode açýksa çizelim
+            if (!isEditMode) return;
+
+            Gizmos.color = new Color(0.5f, 0.5f, 0.5f, 0.3f); // Yarý saydam gri
+
+            // Örnek: -10 ile +10 arasý bir alan çizelim (Oyun alanýna göre deðiþtirebilirsin)
+            // Dikey Çizgiler
+            for (int x = -15; x <= 15; x++)
+            {
+                Gizmos.DrawLine(new Vector3(x, -10, 0), new Vector3(x, 10, 0));
+            }
+
+            // Yatay Çizgiler
+            for (int y = -10; y <= 10; y++)
+            {
+                Gizmos.DrawLine(new Vector3(-15, y, 0), new Vector3(15, y, 0));
+            }
+
+            // Mevcut Düþmanlarýn Altýna Ýþaret Koy (Daha belirgin olsun diye)
+            if (currentLevelData != null && currentLevelData.enemies != null)
+            {
+                foreach (var enemy in currentLevelData.enemies)
+                {
+                    // Asker tipine göre renk verelim
+                    switch (enemy.type)
+                    {
+                        case EnemyType.Infantry: Gizmos.color = Color.red; break;
+                        case EnemyType.Archer: Gizmos.color = Color.green; break;
+                        case EnemyType.Cavalry: Gizmos.color = Color.blue; break;
+                    }
+                    // Askerin olduðu yere tel kafes çiz
+                    Gizmos.DrawWireCube(enemy.position, Vector3.one);
+                }
+            }
+        }
     }
 }
