@@ -24,7 +24,7 @@ public abstract class BaseUnit : MonoBehaviour
     public Sprite rank3Sprite; // Üç þeritli/Yýldýzlý simge
 
     [Header("Unit Info")]
-    private string unitFullName;
+    public string unitFullName;
 
     public virtual void Awake()
     {

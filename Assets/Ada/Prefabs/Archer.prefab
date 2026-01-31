@@ -187,7 +187,7 @@ MonoBehaviour:
   currentRank: 1
   rankIconImage: {fileID: 7735177890463278175}
   rank1Sprite: {fileID: 21300000, guid: c6018daec0678e24691353c701a925af, type: 3}
-  rank2Sprite: {fileID: -7499352924575113857, guid: bd85b0048e19d294b9139be7ef9818be, type: 3}
+  rank2Sprite: {fileID: 21300000, guid: 552609d7b6a3fa04c8dd21c371499765, type: 3}
   rank3Sprite: {fileID: 21300000, guid: 79a985b7e9ffdb144b5b314a94366403, type: 3}
   isSelected: 0
   arrowPrefab: {fileID: 3517653925162236274, guid: cb8a8300be48ed640a89443ef242a93c, type: 3}

@@ -4,7 +4,7 @@ public class UnitRegistration : MonoBehaviour
 {
     [Tooltip("Bu birim oyuncunun askeri mi? (Deðilse Düþman sayýlýr)")]
     public bool isPlayerUnit = true;
-    public EnemyType unitType;
+    public UnitType unitType;
 
     private void Start()
     {
