@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b31cbfcb2d2d4ad428da0f97fc186be3, type: 3}
   m_Name: InfantryData
   m_EditorClassIdentifier: 
-  unitName: Cavalry
-  type: 2
-  maxHealth: 2
+  unitName: Infantry
+  type: 0
+  maxHealth: 15
   moveSpeed: 2
   attackDamage: 2
   attackRange: 1

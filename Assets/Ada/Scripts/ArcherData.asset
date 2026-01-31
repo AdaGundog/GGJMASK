@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitName: Archer
   type: 1
-  maxHealth: 2
+  maxHealth: 8
   moveSpeed: 2
   attackDamage: 2
   attackRange: 5
