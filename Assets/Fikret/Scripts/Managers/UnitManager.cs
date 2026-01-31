@@ -43,25 +43,19 @@ public class UnitManager : MonoBehaviour
         CheckGameEndCondition();
     }
 
-    // Oyun bitti mi kontrolü
     private void CheckGameEndCondition()
     {
         if (GameManager.Instance.CurrentState != GameState.Battle) return;
 
         if (activePlayerUnits.Count == 0 && activeEnemyUnits.Count > 0)
         {
-            Debug.Log("❌ KAYBETTİNİZ!");
-            // GameManager.Instance.GameOver(); // İleride eklenecek
+            GameManager.Instance.TriggerDefeat();
         }
         else if (activeEnemyUnits.Count == 0 && activePlayerUnits.Count > 0)
         {
-            Debug.Log("🏆 KAZANDINIZ! Gaziler kaydediliyor...");
-
-            // 1. Önce Gazileri Kaydet
+            // Kazandık -> Önce kaydet, sonra bildir
             GameManager.Instance.SaveSurvivors(activePlayerUnits);
-
-            // 2. Sonra Level Atlat (GameManager her şeyi halledecek)
-            GameManager.Instance.LevelCompleted();
+            GameManager.Instance.TriggerVictory();
         }
     }
 }

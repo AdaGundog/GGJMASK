@@ -33,6 +33,8 @@ public class GameManager : MonoBehaviour
 
     public event Action OnBattleStarted;
     public event Action<int> OnMoneyChanged;
+    public event Action OnVictory;
+    public event Action OnDefeat;
 
     [Header("Economy")]
     public int startingMoney = 500;
@@ -117,24 +119,37 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Oyun Kaydedildi! {veterans.Count} asker bir sonraki bölüme aktarılıyor.");
     }
 
-    // --- TEST İÇİN RESETLEME ---
-    private void Update()
+    // UnitManager buradan çağıracak
+    public void TriggerVictory()
     {
-        // 'R' tuşuna basınca her şeyi sıfırla ve Level 1'e veya mevcut levele dön
-        if (Input.GetKeyDown(KeyCode.R))
+        if (CurrentState == GameState.Victory) return; // Zaten kazandık
+        CurrentState = GameState.Victory;
+
+        Debug.Log("🏆 ZAFER DUYURULDU!");
+        OnVictory?.Invoke(); // UI bunu duyup paneli açacak
+    }
+
+    public void TriggerDefeat()
+    {
+        if (CurrentState == GameState.Defeat) return;
+        CurrentState = GameState.Defeat;
+
+        Debug.Log("❌ BOZGUN DUYURULDU!");
+        OnDefeat?.Invoke(); // UI bunu duyup paneli açacak
+    }
+
+    public void RetryLevel()
+    {
+        // Kaybedince tekrar deneme mantığı
+        CurrentState = GameState.Preparation;
+        CurrentMoney = startingMoney;
+        OnMoneyChanged?.Invoke(CurrentMoney);
+
+        if (UnitManager.Instance != null)
         {
-            CurrentState = GameState.Preparation;
-            CurrentMoney = startingMoney; // Parayı resetle
-
-            // UI Güncellensin diye event tetikle
-            OnMoneyChanged?.Invoke(CurrentMoney);
-
-            if (UnitManager.Instance != null)
-            {
-                UnitManager.Instance.activePlayerUnits.Clear();
-                UnitManager.Instance.activeEnemyUnits.Clear();
-            }
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            UnitManager.Instance.activePlayerUnits.Clear();
+            UnitManager.Instance.activeEnemyUnits.Clear();
         }
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
