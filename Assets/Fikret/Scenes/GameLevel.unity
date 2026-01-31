@@ -2917,9 +2917,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   spawnZoneCollider: {fileID: 206210017}
-  infantryPrefab: {fileID: 6153271434472941392, guid: 0eede15f289e3df4a9744c6d911e5b82, type: 3}
-  archerPrefab: {fileID: 1538886011966496007, guid: ed345276e4196174281e406ffb7015dc, type: 3}
-  cavalryPrefab: {fileID: 6422337907584808583, guid: 4529701a28549484fb05f1ef27171352, type: 3}
+  infantryPrefab: {fileID: 380019918040707157, guid: 4b3ce254266e8614f93ea132b966f312, type: 3}
+  archerPrefab: {fileID: 1373959668919370210, guid: 604cae68286932746ba8fa506e4ac950, type: 3}
+  cavalryPrefab: {fileID: 3716668354703957592, guid: 76d52324449ea9249905d178d7d93f68, type: 3}
   ghostObject: {fileID: 3593064024943052013, guid: 16609569630e0384184ed4fc5d306f31, type: 3}
   infantryCost: 50
   archerCost: 75
@@ -2950,9 +2950,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a615de42f78e5d4e9ea552d63ea356c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  realInfantryPrefab: {fileID: 6153271434472941392, guid: 0eede15f289e3df4a9744c6d911e5b82, type: 3}
-  realArcherPrefab: {fileID: 1538886011966496007, guid: ed345276e4196174281e406ffb7015dc, type: 3}
-  realCavalryPrefab: {fileID: 6422337907584808583, guid: 4529701a28549484fb05f1ef27171352, type: 3}
+  realInfantryPrefab: {fileID: 4928925506106156901, guid: 2964579dea727964b8a27319b498e8be, type: 3}
+  realArcherPrefab: {fileID: 4933282089761000114, guid: 87997523fc4527f47b06af3931d8dde4, type: 3}
+  realCavalryPrefab: {fileID: 2319745635881528651, guid: 6d8eff2e2599c2644a0703683b38edce, type: 3}
   gameUnitsParent: {fileID: 953744768}
 --- !u!114 &2130001171
 MonoBehaviour:
