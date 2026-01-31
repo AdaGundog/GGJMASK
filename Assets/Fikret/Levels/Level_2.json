@@ -1,0 +1,55 @@
+{
+    "levelName": "Level_2",
+    "startingInkAmount": 100.0,
+    "enemies": [
+        {
+            "type": 0,
+            "position": {
+                "x": 6.0,
+                "y": 3.0
+            }
+        },
+        {
+            "type": 1,
+            "position": {
+                "x": 5.0,
+                "y": 1.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": 5.0,
+                "y": -1.0
+            }
+        },
+        {
+            "type": 1,
+            "position": {
+                "x": 8.0,
+                "y": -3.0
+            }
+        },
+        {
+            "type": 0,
+            "position": {
+                "x": 3.0,
+                "y": -3.0
+            }
+        },
+        {
+            "type": 1,
+            "position": {
+                "x": 1.0,
+                "y": 4.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": 3.0,
+                "y": 1.0
+            }
+        }
+    ]
+}
