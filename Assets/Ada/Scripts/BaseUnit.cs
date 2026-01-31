@@ -7,6 +7,7 @@ public abstract class BaseUnit : MonoBehaviour
     public UnitData data;
     public float currentHealth;
     protected NavMeshAgent agent;
+    [SerializeField] private GameObject healthBarGroup;
     public UnityEngine.UI.Image healthBarFill; // Inspector'dan yeþil resmi buraya sürükle
 
     [Header("Combat State")]
@@ -69,23 +70,18 @@ public abstract class BaseUnit : MonoBehaviour
         currentHealth -= finalDamage;
 
         // UI GÜNCELLEME
-        if (healthBarFill != null)
-        {
-            // Canvas'ý aktif et (Eðer kapalýysa)
-            GameObject canvasObj = healthBarFill.canvas != null ?
-                                   healthBarFill.canvas.gameObject :
-                                   healthBarFill.transform.parent.gameObject;
-
-            if (canvasObj != null && !canvasObj.activeSelf)
-            {
-                canvasObj.SetActive(true);
-            }
-
-            // Doluluk oranýný hesapla (Float bölmesi)
-            healthBarFill.fillAmount = (float)currentHealth / (float)data.maxHealth;
-
-            Debug.Log($"{gameObject.name} (Rank {currentRank}) hasar aldý. Vuran Rank: {attackerRank}. Kalan Can: {currentHealth}");
-        }
+        if (healthBarGroup != null)
+    {
+        // Rütbe simgesine dokunmadan sadece can barýný gösteriyoruz
+        healthBarGroup.SetActive(true);
+        
+        // Can barý oranýný güncelle
+        healthBarFill.fillAmount = currentHealth / data.maxHealth;
+        
+        // 3 saniye sonra can barýný kapatmasý için (Opsiyonel)
+        CancelInvoke("HideHealthBar");
+        Invoke("HideHealthBar", 3f);
+    }
 
         if (currentHealth <= 0) Die();
     }
@@ -99,16 +95,15 @@ public abstract class BaseUnit : MonoBehaviour
 
     public void UpdateRankVisuals()
     {
+        // Eðer resim atanmamýþsa hata vermemesi için kontrol
         if (rankIconImage == null) return;
 
-        switch (currentRank)
-        {
-            case 1: rankIconImage.sprite = rank1Sprite; break;
-            case 2: rankIconImage.sprite = rank2Sprite; break;
-            case 3: rankIconImage.sprite = rank3Sprite; break;
-        }
+        // Rütbeye göre Sprite (resim) deðiþtir
+        if (currentRank == 1) rankIconImage.sprite = rank1Sprite;
+        else if (currentRank == 2) rankIconImage.sprite = rank2Sprite;
+        else if (currentRank == 3) rankIconImage.sprite = rank3Sprite;
 
-        // Rütbe 1'de simgeyi gizlemek istersen:
+        // Rank 1 ise simgeyi gizleyebiliriz (isteðe baðlý)
         rankIconImage.gameObject.SetActive(currentRank > 1);
     }
 

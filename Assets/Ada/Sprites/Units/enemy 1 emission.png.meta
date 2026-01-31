@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 75e1ed780ea05f64085cecfb6ffe9ef1
+guid: fbff185dfed425043a332cade7c57de7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 407907198125173640
-    second: enemy 1_0
+      213: 1793133758624074
+    second: enemy 1 emission_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: enemy 1_0
+      name: enemy 1 emission_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 40
-        height: 50
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 88b639d7f6d29a500800000000000000
-      internalID: 407907198125173640
+      spriteID: a41b7bc78de560000800000000000000
+      internalID: 1793133758624074
       vertices: []
       indices: 
       edges: []
@@ -126,18 +126,16 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: fbff185dfed425043a332cade7c57de7, type: 3}
-      name: _Emission
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      enemy 1_0: 407907198125173640
+      enemy 1 emission_0: 1793133758624074
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
