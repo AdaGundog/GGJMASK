@@ -16,10 +16,12 @@ public enum GameState
 public class VeteranData
 {
     public EnemyType type;
+    public int rank;
 
-    public VeteranData(EnemyType t)
+    public VeteranData(EnemyType t, int r)
     {
         type = t;
+        rank = r;
     }
 }
 
@@ -104,21 +106,22 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
+    // GameManager.cs içinde güncelle
     public void SaveSurvivors(List<GameObject> survivors)
     {
         veterans.Clear();
-
         foreach (GameObject unit in survivors)
         {
+            BaseUnit baseUnit = unit.GetComponent<BaseUnit>(); // Senin scriptin
             UnitRegistration reg = unit.GetComponent<UnitRegistration>();
-            if (reg != null)
+
+            if (baseUnit != null && reg != null)
             {
-                veterans.Add(new VeteranData(reg.unitType));
+                // Hem tipi hem de senin rütbe verini kaydediyoruz
+                veterans.Add(new VeteranData(reg.unitType, baseUnit.currentRank));
             }
         }
-        Debug.Log($"Oyun Kaydedildi! {veterans.Count} asker bir sonraki bölüme aktarılıyor.");
     }
-
     // UnitManager buradan çağıracak
     public void TriggerVictory()
     {
