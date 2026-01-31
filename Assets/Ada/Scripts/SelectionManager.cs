@@ -4,6 +4,7 @@ using System.Collections.Generic;
 public class SelectionManager : MonoBehaviour
 {
     public RectTransform selectionBox;
+    private Vector2 startClickPos; // Farenin ilk týklandýðý yer
     public LayerMask unitLayer;
     public LayerMask enemyLayer;
 
@@ -11,32 +12,26 @@ public class SelectionManager : MonoBehaviour
     // Listeyi PlayerUnit tipine çevirdik
     public List<PlayerUnit> selectedUnits = new List<PlayerUnit>();
 
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            startPos = Input.mousePosition;
-            if (!TrySingleClick())
-            {
-                ClearSelection();
-                selectionBox.gameObject.SetActive(true);
-            }
+            startClickPos = Input.mousePosition;
         }
 
-        if (Input.GetMouseButton(0) && selectionBox.gameObject.activeSelf)
+        if (Input.GetMouseButton(0))
         {
             UpdateSelectionBox(Input.mousePosition);
         }
 
         if (Input.GetMouseButtonUp(0))
         {
-            if (selectionBox.gameObject.activeSelf)
-            {
-                ReleaseSelectionBox();
-            }
+            ReleaseSelectionBox();
         }
 
-        if (Input.GetMouseButtonDown(1) && selectedUnits.Count > 0)
+        // SAÐ TIK KONTROLÜ
+        if (Input.GetMouseButtonDown(1)) // 1 sað týk demektir
         {
             HandleRightClick();
         }
@@ -67,6 +62,11 @@ public class SelectionManager : MonoBehaviour
 
     void HandleRightClick()
     {
+        // Ölmüþ (null olmuþ) birimleri listeden temizle
+        selectedUnits.RemoveAll(unit => unit == null);
+
+        if (selectedUnits.Count == 0) return; // Seçili canlý birim yoksa iþlem yapma
+
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
 
@@ -90,39 +90,67 @@ public class SelectionManager : MonoBehaviour
         }
     }
 
-    void UpdateSelectionBox(Vector2 curMousePos)
+    void UpdateSelectionBox(Vector2 currentMousePos)
     {
-        if (!selectionBox.gameObject.activeSelf)
+        if (!selectionBox.gameObject.activeInHierarchy)
             selectionBox.gameObject.SetActive(true);
 
-        float width = curMousePos.x - startPos.x;
-        float height = curMousePos.y - startPos.y;
+        // 1. Farenin pozisyonunu Canvas üzerindeki yerel pozisyona çevir
+        RectTransform canvasRect = selectionBox.parent as RectTransform;
+        Vector2 localStartPos;
+        Vector2 localCurrentPos;
 
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, startClickPos, null, out localStartPos);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, currentMousePos, null, out localCurrentPos);
+
+        // 2. Geniþlik ve yükseklik hesapla
+        float width = localCurrentPos.x - localStartPos.x;
+        float height = localCurrentPos.y - localStartPos.y;
+
+        // 3. Boyutu mutlak deðerle ayarla
         selectionBox.sizeDelta = new Vector2(Mathf.Abs(width), Mathf.Abs(height));
-        selectionBox.position = startPos + new Vector2(width / 2, height / 2);
+
+        // 4. Merkezi hesapla (Pivot 0.5, 0.5 ise)
+        selectionBox.anchoredPosition = localStartPos + new Vector2(width / 2, height / 2);
     }
 
     void ReleaseSelectionBox()
     {
         selectionBox.gameObject.SetActive(false);
 
-        Vector2 min = startPos;
+        // 1. Kutunun sýnýrlarýný hesapla
+        Vector2 min = startClickPos; // startPos yerine startClickPos kullanýyoruz
         Vector2 max = Input.mousePosition;
+
+        // Eðer kutu çok küçükse (sadece týklanmýþsa sürüklenmemiþse)
+        if (Vector2.Distance(min, max) < 5f)
+        {
+            if (!TrySingleClick())
+            {
+                ClearSelection(); // Boþluða týklandýysa her þeyi temizle
+            }
+            return;
+        }
+
+        // 2. Yeni seçim yapmadan önce eskileri temizle
+        ClearSelection();
+
+        // 3. Ekran koordinatlarýný doðrula
         Vector2 realMin = new Vector2(Mathf.Min(min.x, max.x), Mathf.Min(min.y, max.y));
         Vector2 realMax = new Vector2(Mathf.Max(min.x, max.x), Mathf.Max(min.y, max.y));
 
-        // Sahnedeki PlayerUnit'leri buluyoruz
+        // 4. Tüm PlayerUnit'leri tara
         PlayerUnit[] allUnits = FindObjectsOfType<PlayerUnit>();
         foreach (PlayerUnit unit in allUnits)
         {
-            if (((1 << unit.gameObject.layer) & unitLayer) != 0)
+            // Birimin dünya pozisyonunu ekran pozisyonuna çevir
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(unit.transform.position);
+
+            // Birim kutunun içinde mi?
+            if (screenPos.x > realMin.x && screenPos.x < realMax.x && screenPos.y > realMin.y && screenPos.y < realMax.y)
             {
-                Vector3 screenPos = Camera.main.WorldToScreenPoint(unit.transform.position);
-                if (screenPos.x > realMin.x && screenPos.x < realMax.x && screenPos.y > realMin.y && screenPos.y < realMax.y)
-                {
-                    selectedUnits.Add(unit);
-                    unit.isSelected = true;
-                }
+                selectedUnits.Add(unit);
+                unit.isSelected = true;
             }
         }
     }

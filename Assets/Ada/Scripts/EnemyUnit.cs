@@ -120,13 +120,13 @@ public class EnemyUnit : BaseUnit
                 GameObject arrowObj = Instantiate(arrowPrefab, transform.position, Quaternion.identity);
 
                 // Oku hedefe (oyuncuya) odakla
-                arrowObj.GetComponent<Projectile>().Setup(target, data.attackDamage, data.type);
+                arrowObj.GetComponent<Projectile>().Setup(target, data.attackDamage, data.type, currentRank);
                 Debug.Log(gameObject.name + " ok fýrlattý!");
             }
             else
             {
                 // Yakýn dövüþçü ise doðrudan hasar ver
-                target.TakeDamage(data.attackDamage, data.type);
+                target.TakeDamage(data.attackDamage, data.type, currentRank);
             }
 
             lastAttackTime = Time.time;
