@@ -36,12 +36,11 @@ public class DeploymentManager : MonoBehaviour
 
     private void SpawnVeterans()
     {
-        if (GameManager.Instance != null && GameManager.Instance.veterans.Count > 0)
+        if (GameManager.Instance.veterans.Count > 0)
         {
             Debug.Log("Gaziler sahneye yerleştiriliyor...");
 
             Vector3 spawnStartPos = spawnZoneCollider.bounds.center;
-            // Askerleri alanın biraz solundan başlat
             spawnStartPos.x -= spawnZoneCollider.bounds.extents.x * 0.8f;
             int index = 0;
 
@@ -49,18 +48,35 @@ public class DeploymentManager : MonoBehaviour
             {
                 GameObject prefabToSpawn = null;
 
+                // HATA BURADAYDI: EnemyType yerine UnitType kullanmalısın
                 switch (vet.type)
                 {
-                    case EnemyType.Infantry: prefabToSpawn = infantryPrefab; break;
-                    case EnemyType.Archer: prefabToSpawn = archerPrefab; break;
-                    case EnemyType.Cavalry: prefabToSpawn = cavalryPrefab; break;
+                    case UnitType.Infantry: prefabToSpawn = infantryPrefab; break;
+                    case UnitType.Archer: prefabToSpawn = archerPrefab; break;
+                    case UnitType.Cavalry: prefabToSpawn = cavalryPrefab; break;
                 }
 
                 if (prefabToSpawn != null)
                 {
-                    // Basit bir dizilim mantığı (yan yana ve alt alta)
+                    // Pozisyonu hesapla (5'li sıralar halinde dizilirler)
                     Vector3 pos = spawnStartPos + new Vector3((index % 5) * 1.5f, (index / 5) * -1.5f, 0);
-                    Instantiate(prefabToSpawn, pos, Quaternion.identity);
+
+                    // Objeyi yarat
+                    GameObject newVet = Instantiate(prefabToSpawn, pos, Quaternion.identity);
+
+                    // --- KİMLİK VE RÜTBE YÜKLEME ---
+                    BaseUnit bUnit = newVet.GetComponent<BaseUnit>();
+                    if (bUnit != null)
+                    {
+                        bUnit.unitFullName = vet.unitName; // Eski ismini geri ver
+                        bUnit.currentRank = vet.rank;      // Kaydedilen rütbesini ver
+
+                        // Görselleri (Rank ikonu ve Emission parlaması) güncelle
+                        bUnit.UpdateRankVisuals();
+
+                        // Hierarchy'de ismini düzelt
+                        newVet.name = "Veteran_" + vet.unitName;
+                    }
                 }
                 index++;
             }
