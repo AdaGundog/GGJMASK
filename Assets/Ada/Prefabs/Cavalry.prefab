@@ -203,6 +203,9 @@ MonoBehaviour:
   rank2Sprite: {fileID: 21300000, guid: 552609d7b6a3fa04c8dd21c371499765, type: 3}
   rank3Sprite: {fileID: 21300000, guid: 79a985b7e9ffdb144b5b314a94366403, type: 3}
   unitFullName: 
+  hpBonusPerRank: 4
+  damageMultiplierPerRank: 0.2
+  tankinessPerRank: 0.1
   selectionCircle: {fileID: 8874644831113333282}
   defaultColor: {r: 0, g: 1, b: 0, a: 1}
   selectedColor: {r: 0, g: 0, b: 1, a: 1}

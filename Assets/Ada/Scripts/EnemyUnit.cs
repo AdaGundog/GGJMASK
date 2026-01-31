@@ -8,6 +8,7 @@ public class EnemyUnit : BaseUnit
 
     void Update()
     {
+        //  Hazırlık aşamasındaysak dur
         if (GameManager.Instance.CurrentState != GameState.Battle)
         {
             if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
@@ -16,48 +17,26 @@ public class EnemyUnit : BaseUnit
 
         if (agent != null) agent.isStopped = false;
 
-        // Hedef yoksa veya öldüyse yeni hedef bul
+        // 1. Hedef kontrolü: Hedef yoksa veya öldüyse yeni hedef bul
         if (target == null || target.currentHealth <= 0)
         {
-            FindBestTarget();
+            FindBestTarget(); // Senin istediğin sıralama burada çalışıyor
             if (target == null && agent.isOnNavMesh) agent.isStopped = true;
             return;
         }
 
         float distance = Vector2.Distance(transform.position, target.transform.position);
 
-        // KAÇMA VE YENİDEN HEDEFLEME MANTIĞI
-        // Eğer mevcut hedef bize karşı avantajlıysa VE çok yakınsa:
-        if (CheckAdvantage(target.data.type, data.type) && distance < 3f)
-        {
-            // Önce etrafta daha güvenli başka biri var mı diye bak (Anlık kontrol)
-            BaseUnit oldTarget = target;
-            FindBestTarget();
-
-            // Eğer hala aynı (tehlikeli) hedefe kilitliysek (yani başka çare yoksa) KAÇ
-            if (target == oldTarget)
-            {
-                Vector2 runDirection = (transform.position - target.transform.position).normalized;
-                Vector2 escapePoint = (Vector2)transform.position + runDirection * 3f;
-
-                if (agent.isOnNavMesh)
-                {
-                    agent.isStopped = false;
-                    agent.SetDestination(escapePoint);
-                }
-                return;
-            }
-            // Eğer FindBestTarget bize daha güvenli birini bulduysa, kaçmayı bırakıp ona yönelecek (Update devam edecek)
-        }
-
-        // SALDIRI VE TAKİP
+        // 2. SALDIRI VEYA TAKİP (Kaçış kodu silindi!)
         if (distance <= data.attackRange)
         {
+            // Menzile girdiyse dur ve vur
             if (agent.isOnNavMesh) agent.isStopped = true;
             TryAttack();
         }
         else
         {
+            // Menzil dışındaysa korkmadan üstüne git
             if (agent.isOnNavMesh)
             {
                 agent.isStopped = false;
@@ -66,46 +45,55 @@ public class EnemyUnit : BaseUnit
         }
     }
 
-    void FindBestTarget()
+    public void FindBestTarget()
     {
         PlayerUnit[] players = FindObjectsOfType<PlayerUnit>();
         BaseUnit bestTarget = null;
-        float highestPriority = -Mathf.Infinity;
+        float minDistance = Mathf.Infinity;
 
+        // Önce en kritik grubu bulalım (Bana saldıranlar)
+        // Eğer okçuysak bu grubu atlayıp direkt avantaj grubuna bakabiliriz (isteğe bağlı)
         foreach (PlayerUnit p in players)
         {
             if (p == null || p.currentHealth <= 0) continue;
+            float dist = Vector2.Distance(transform.position, p.transform.position);
+            if (dist > 15f) continue;
 
-            float distance = Vector2.Distance(transform.position, p.transform.position);
-            if (distance > 20f) continue; // Görüş mesafesi dışı
-
-            float currentPriority = 0;
-
-            // 1. TEMEL PUAN: Mesafe (Yakınlık her zaman çok önemli)
-            // Yakın olan birimlere 0-20 arası puan verir.
-            currentPriority += (20f - distance);
-
-            // 2. STRATEJİK PUAN: Avantaj Durumu
-            // Sadece birim makul bir mesafedeyse (örn: 10 birim) avantaj puanı ekle. 
-            // Çok uzaktaki avantajlı birim için tüm orduyu yarıp geçmesin.
-            if (CheckAdvantage(data.type, p.data.type))
+            // GRUP 1: Bana yakından saldıranlar (En yüksek öncelik)
+            if (p.target == this && dist < 5f)
             {
-                if (distance < 10f) currentPriority += 15f; // Yakındaysa büyük öncelik
-                else currentPriority += 5f; // Uzaktaysa küçük öncelik
+                if (dist < minDistance) { minDistance = dist; bestTarget = p; }
             }
+        }
 
-            // 3. TEHLİKE DURUMU: Dezavantaj
-            // Eğer hedef bize karşı avantajlıysa puanı ciddi oranda düşür.
-            // Bu, düşmanın "en son çare" olarak bu birime saldırmasını sağlar.
-            if (CheckAdvantage(p.data.type, data.type))
+        // Eğer bana saldıran yoksa GRUP 2'ye bak: Avantajlı olduğum birimler
+        if (bestTarget == null)
+        {
+            minDistance = Mathf.Infinity;
+            foreach (PlayerUnit p in players)
             {
-                currentPriority -= 25f;
+                if (p == null || p.currentHealth <= 0) continue;
+                float dist = Vector2.Distance(transform.position, p.transform.position);
+                if (dist > 15f) continue;
+
+                if (CheckAdvantage(data.type, p.data.type))
+                {
+                    if (dist < minDistance) { minDistance = dist; bestTarget = p; }
+                }
             }
+        }
 
-            if (currentPriority > highestPriority)
+        // O da yoksa GRUP 3: Geri kalan her şey (Dezavantajlı dahil en yakın birim)
+        if (bestTarget == null)
+        {
+            minDistance = Mathf.Infinity;
+            foreach (PlayerUnit p in players)
             {
-                highestPriority = currentPriority;
-                bestTarget = p;
+                if (p == null || p.currentHealth <= 0) continue;
+                float dist = Vector2.Distance(transform.position, p.transform.position);
+                if (dist > 15f) continue;
+
+                if (dist < minDistance) { minDistance = dist; bestTarget = p; }
             }
         }
 
