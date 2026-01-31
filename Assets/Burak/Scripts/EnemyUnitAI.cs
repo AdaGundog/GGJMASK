@@ -8,7 +8,7 @@ public class EnemyUnitAI : MonoBehaviour
     public UnitType unitType;
     public UnitRank currentRank;
 
-    [Header("Bile�enler")]
+    [Header("Bile�enler")]
     public NavMeshAgent agent;
 
     private Transform myCastle;
@@ -35,8 +35,17 @@ public class EnemyUnitAI : MonoBehaviour
         if (rank == UnitRank.Elite) maxHealth *= 1.5f;
         currentHealth = maxHealth;
 
-        agent.updateRotation = false;
-        agent.updateUpAxis = false;
+        // Agent yoksa otomatik bul
+        if (agent == null)
+        {
+            agent = GetComponent<NavMeshAgent>();
+        }
+
+        if (agent != null)
+        {
+            agent.updateRotation = false;
+            agent.updateUpAxis = false;
+        }
     }
 
     void Update()
@@ -98,35 +107,67 @@ public class EnemyUnitAI : MonoBehaviour
         if (enemies.Length == 0) return enemyCastle;
 
         Transform bestTarget = null;
-        float lowestScore = Mathf.Infinity;
+        float highestPriority = -Mathf.Infinity;
 
         foreach (GameObject enemy in enemies)
         {
-            float dist = Vector3.Distance(transform.position, enemy.transform.position);
+            PlayerUnit pUnit = enemy.GetComponent<PlayerUnit>();
+            if (pUnit == null) continue;
 
-            float score = dist;
+            float distance = Vector2.Distance(transform.position, enemy.transform.position);
+            
+            // Çok uzaktaki hedefleri atla
+            if (distance > 20f) continue;
 
+            // ÖNCELİK HESAPLAMA
+            float priority = 0;
+
+            // 1. MESAFE (Yakın = İyi) - %40
+            priority += (20f - distance) * 2f;
+
+            // 2. TİP AVANTAJI (Avantajlı hedef = İyi) - %40
+            if (IsCounterTarget(pUnit.type))
+            {
+                priority += 40f; // Avantajlı hedefe öncelik ver
+            }
+            else if (IsWeakAgainst(pUnit.type))
+            {
+                priority -= 30f; // Dezavantajlı hedeften kaç
+            }
+
+            // 3. CAN DURUMU (Düşük can = Kolay hedef) - %20
+            if (pUnit.currentHealth < pUnit.data.maxHealth * 0.3f)
+            {
+                priority += 20f; // Ölmek üzere olan hedefi bitir
+            }
+
+            // 4. RANK BONUSU
             if (currentRank != UnitRank.Rookie)
             {
-                PlayerUnit pUnit = enemy.GetComponent<PlayerUnit>();
-
-                if (pUnit != null)
+                // Veteran ve Elite daha akıllı hedef seçer
+                if (IsCounterTarget(pUnit.type))
                 {
-                    if (IsCounterTarget(pUnit.type))
-                    {
-                        score -= 5.0f; 
-                    }
+                    priority += 10f;
                 }
             }
 
-            if (score < lowestScore)
+            if (priority > highestPriority)
             {
-                lowestScore = score;
+                highestPriority = priority;
                 bestTarget = enemy.transform;
             }
         }
 
         return bestTarget != null ? bestTarget : enemyCastle;
+    }
+
+    // Yeni fonksiyon: Dezavantajlı mı?
+    bool IsWeakAgainst(UnitType enemyType)
+    {
+        if (unitType == UnitType.Infantry && enemyType == UnitType.Archer) return true;
+        if (unitType == UnitType.Cavalry && enemyType == UnitType.Infantry) return true;
+        if (unitType == UnitType.Archer && enemyType == UnitType.Cavalry) return true;
+        return false;
     }
 
     bool IsCounterTarget(UnitType enemyType)
@@ -173,7 +214,16 @@ public class EnemyUnitAI : MonoBehaviour
     {
         if (Time.time - lastAttackTime > attackCooldown)
         {
-            Debug.Log(name + " vurdu: " + target.name);
+            // Gerçek hasar ver (BaseUnit sistemini kullan)
+            PlayerUnit playerUnit = target.GetComponent<PlayerUnit>();
+            if (playerUnit != null)
+            {
+                // Taş-Kağıt-Makas hasarı
+                float baseDamage = 10f; // Temel hasar
+                playerUnit.TakeDamage(baseDamage, unitType, (int)currentRank);
+                Debug.Log($"{name} ({unitType}) vurdu: {target.name} - Hasar: {baseDamage}");
+            }
+            
             lastAttackTime = Time.time;
         }
     }

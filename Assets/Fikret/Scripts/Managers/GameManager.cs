@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public GameState CurrentState { get; private set; }
+    public TilemapPainter tilemapPainter;
 
     // --- YENİ: LEVEL SAYACI ---
     public int currentLevelIndex = 1;
@@ -39,7 +40,7 @@ public class GameManager : MonoBehaviour
     public event Action OnDefeat;
 
     [Header("Economy")]
-    public int startingMoney = 500;
+    public int startingMoney;
     public int CurrentMoney { get; private set; }
 
     // Gaziler Listesi
@@ -61,6 +62,13 @@ public class GameManager : MonoBehaviour
         CurrentMoney = startingMoney;
     }
 
+    private void Start()
+    {
+        if(tilemapPainter != null)
+        {
+            startingMoney = tilemapPainter.inkAmount;
+        }
+    }
     // --- YENİ: LEVEL BİTİRME FONKSİYONU ---
     public void LevelCompleted()
     {

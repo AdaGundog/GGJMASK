@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 public class SelectionManager : MonoBehaviour
 {
+
+    public TilemapPainter painter;
+
     public RectTransform selectionBox;
     private Vector2 startClickPos; // Farenin ilk týklandýðý yer
     public LayerMask unitLayer;
@@ -15,6 +18,9 @@ public class SelectionManager : MonoBehaviour
 
     void Update()
     {
+        if (painter.isPaintingMode && painter != null) return;
+
+
         if (Input.GetMouseButtonDown(0))
         {
             startClickPos = Input.mousePosition;

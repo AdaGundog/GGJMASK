@@ -91,7 +91,7 @@ GameObject:
   - component: {fileID: 7239870034517105044}
   m_Layer: 7
   m_Name: Archer
-  m_TagString: Player
+  m_TagString: PlayerUnit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -155,7 +155,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 99
   m_Sprite: {fileID: 21300000, guid: 6ed3f02f4270307499c32858a43d333b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -189,6 +189,7 @@ MonoBehaviour:
   rank1Sprite: {fileID: 21300000, guid: c6018daec0678e24691353c701a925af, type: 3}
   rank2Sprite: {fileID: -7499352924575113857, guid: bd85b0048e19d294b9139be7ef9818be, type: 3}
   rank3Sprite: {fileID: 21300000, guid: 79a985b7e9ffdb144b5b314a94366403, type: 3}
+  type: 0
   isSelected: 0
   arrowPrefab: {fileID: 3517653925162236274, guid: cb8a8300be48ed640a89443ef242a93c, type: 3}
 --- !u!195 &8606908269315970615

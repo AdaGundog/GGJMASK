@@ -3,14 +3,17 @@ using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 public class TilemapPainter : MonoBehaviour
 {
+    [Header("Game Mananeger")]
+    public GameManager gameManager;
+
     [Header("Tilemap Ayarlarý")]
     public Tilemap obstacleTilemap;
     public TileBase wallTile;
     public Camera mainCamera;
 
     [Header("Mürekkep Ayarlarý")]
-    public float inkAmount = 100f;
-    public float costPerTile = 1f;
+    public int inkAmount;
+    public int costPerTile = 1;
 
     [Header("Fýrça Ayarlarý")]
     public int brushRadius = 2;
@@ -23,7 +26,7 @@ public class TilemapPainter : MonoBehaviour
     public float tileLifetime = 30f; 
     public float fadeDuration = 5f;  
 
-    private bool isPaintingMode = false;
+    public bool isPaintingMode = false;
 
     private class PaintedTile
     {
@@ -36,6 +39,7 @@ public class TilemapPainter : MonoBehaviour
     void Start()
     {
         if (mainCamera == null) mainCamera = Camera.main;
+        if (gameManager != null) inkAmount = gameManager.startingMoney;
     }
 
     void Update()

@@ -47,20 +47,61 @@ public class EnemyCommander : MonoBehaviour
 
     void MakeDecision()
     {
-        UnitType threatType = AnalyzeEnemyThreat();
+        // Oyuncu kompozisyonunu analiz et
+        Dictionary<UnitType, int> playerComposition = AnalyzePlayerComposition();
+        
+        // En çok olan tipi bul
+        UnitType dominantType = GetDominantType(playerComposition);
+        
+        // Karşı strateji belirle
+        UnitType unitToSpawn = GetCounterUnit(dominantType);
 
-        UnitType unitToSpawn = GetCounterUnit(threatType);
-
+        // Spawn et
         TrySpawnUnit(unitToSpawn);
     }
 
-    UnitType AnalyzeEnemyThreat()
+    // YENİ: Oyuncu kompozisyonunu analiz et
+    Dictionary<UnitType, int> AnalyzePlayerComposition()
     {
         GameObject[] playerUnits = GameObject.FindGameObjectsWithTag("PlayerUnit");
+        
+        Dictionary<UnitType, int> composition = new Dictionary<UnitType, int>
+        {
+            { UnitType.Infantry, 0 },
+            { UnitType.Archer, 0 },
+            { UnitType.Cavalry, 0 }
+        };
 
-        if (playerUnits.Length == 0) return UnitType.Infantry;
+        foreach (GameObject unit in playerUnits)
+        {
+            PlayerUnit pUnit = unit.GetComponent<PlayerUnit>();
+            if (pUnit != null && pUnit.data != null)
+            {
+                composition[pUnit.data.type]++;
+            }
+        }
 
-        return UnitType.Infantry;
+        Debug.Log($"[AI Commander] Oyuncu Güçleri: {composition[UnitType.Infantry]} Piyade, {composition[UnitType.Archer]} Okçu, {composition[UnitType.Cavalry]} Atlı");
+        
+        return composition;
+    }
+
+    // YENİ: En baskın tipi bul
+    UnitType GetDominantType(Dictionary<UnitType, int> composition)
+    {
+        UnitType dominant = UnitType.Infantry;
+        int maxCount = 0;
+
+        foreach (var pair in composition)
+        {
+            if (pair.Value > maxCount)
+            {
+                maxCount = pair.Value;
+                dominant = pair.Key;
+            }
+        }
+
+        return dominant;
     }
 
     UnitType GetCounterUnit(UnitType threat)
@@ -90,18 +131,30 @@ public class EnemyCommander : MonoBehaviour
         {
             Spawn(prefabToSpawn, cost, type);
         }
+        else
+        {
+            Debug.Log($"[AI Commander] Yetersiz altın! İhtiyaç: {cost}, Mevcut: {currentGold}");
+        }
     }
 
     void Spawn(GameObject prefab, float cost, UnitType type)
     {
         currentGold -= cost;
-        GameObject newUnit = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
+        
+        // 2D için spawn pozisyonu (Z=0)
+        Vector3 spawnPos = spawnPoint.position;
+        spawnPos.z = 0;
+        
+        GameObject newUnit = Instantiate(prefab, spawnPos, Quaternion.identity);
+        newUnit.tag = "EnemyUnit"; // Tag'i ayarla
 
         EnemyUnitAI aiScript = newUnit.GetComponent<EnemyUnitAI>();
         if (aiScript != null)
         {
+            aiScript.unitType = type;
             aiScript.Initialize((UnitRank)(currentLevel - 1), myCastleTransform, enemyCastleTransform);
         }
-        Debug.Log($"Commander: {type} �retti. Kalan Alt�n: {currentGold}");
+        
+        Debug.Log($"[AI Commander] {type} üretildi! Kalan Altın: {currentGold:F0}");
     }
 }

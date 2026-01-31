@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 3651899260466868839}
   m_Layer: 7
   m_Name: Infantry
-  m_TagString: Player
+  m_TagString: PlayerUnit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -80,7 +80,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 99
   m_Sprite: {fileID: 21300000, guid: 832eccf58f1e9e3428e096219b41a81e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -114,6 +114,7 @@ MonoBehaviour:
   rank1Sprite: {fileID: 21300000, guid: c6018daec0678e24691353c701a925af, type: 3}
   rank2Sprite: {fileID: 21300000, guid: 552609d7b6a3fa04c8dd21c371499765, type: 3}
   rank3Sprite: {fileID: 21300000, guid: 79a985b7e9ffdb144b5b314a94366403, type: 3}
+  type: 0
   isSelected: 0
   arrowPrefab: {fileID: 0}
 --- !u!195 &28982128902838282
