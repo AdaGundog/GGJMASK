@@ -75,7 +75,7 @@ public class LevelLoader : MonoBehaviour
             {
                 // "Sen oyuncu deðilsin, sen düþmansýn!" de.
                 reg.isPlayerUnit = false;
-                reg.unitType = data.type; // Tipini de garantiye alalým
+                reg.unitType = (UnitType)data.type;
             }
             // ---------------------------------------------
         }

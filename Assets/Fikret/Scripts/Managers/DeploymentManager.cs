@@ -1,35 +1,36 @@
-using UnityEngine;
-using System.Collections.Concurrent;
-using LevelEditor;
-using System;
+ï»¿using UnityEngine;
+using UnityEngine.EventSystems; // UI TÄ±klamasÄ±nÄ± algÄ±lamak iÃ§in ÅŸart
+using LevelEditor; // EnemyType ve VeteranData iÃ§in
 
 public class DeploymentManager : MonoBehaviour
 {
     [Header("Settings")]
-    public LayerMask placementLayer; // Zemin (Ground) layer'ı
-    public Collider2D spawnZoneCollider; // Az önce yarattığımız kutu
+    public Collider2D spawnZoneCollider; // Asker koyulabilecek yeÅŸil alan
 
     [Header("Unit Prefabs")]
-    // Developer A'nın hazırladığı gerçek askerler buraya gelecek
+    // GerÃ§ek asker prefablarÄ±
     public GameObject infantryPrefab;
     public GameObject archerPrefab;
     public GameObject cavalryPrefab;
 
     [Header("Visuals")]
-    public Transform ghostObject; // Mouse'un ucundaki yarı saydam asker
+    public Transform ghostObject; // Mouse'u takip eden yarÄ± saydam asker
 
-    private GameObject selectedPrefab; // Şu an hangisini seçtik?
+    private GameObject selectedPrefab; // Åu an seÃ§ili olan asker tÃ¼rÃ¼
 
     [Header("Unit Costs")]
     public int infantryCost = 50;
     public int archerCost = 75;
     public int cavalryCost = 120;
 
-    private int currentSelectedCost = 0;    
+    private int currentSelectedCost = 0;
+
     private void Start()
     {
-        // Başlangıçta hayalet kapalı
+        // BaÅŸlangÄ±Ã§ta hayalet kapalÄ± olsun
         if (ghostObject) ghostObject.gameObject.SetActive(false);
+
+        // Varsa Ã¶nceki bÃ¶lÃ¼mden kalan gazileri yerleÅŸtir
         SpawnVeterans();
     }
 
@@ -37,7 +38,7 @@ public class DeploymentManager : MonoBehaviour
     {
         if (GameManager.Instance.veterans.Count > 0)
         {
-            Debug.Log("Gaziler sahneye yerleştiriliyor...");
+            Debug.Log("Gaziler sahneye yerleÅŸtiriliyor...");
 
             Vector3 spawnStartPos = spawnZoneCollider.bounds.center;
             spawnStartPos.x -= spawnZoneCollider.bounds.extents.x * 0.8f;
@@ -47,16 +48,35 @@ public class DeploymentManager : MonoBehaviour
             {
                 GameObject prefabToSpawn = null;
 
+                // HATA BURADAYDI: EnemyType yerine UnitType kullanmalÄ±sÄ±n
                 switch (vet.type)
                 {
-                    case EnemyType.Infantry: prefabToSpawn = infantryPrefab; break;
-                    case EnemyType.Archer: prefabToSpawn = archerPrefab; break;
-                    case EnemyType.Cavalry: prefabToSpawn = cavalryPrefab; break;
+                    case UnitType.Infantry: prefabToSpawn = infantryPrefab; break;
+                    case UnitType.Archer: prefabToSpawn = archerPrefab; break;
+                    case UnitType.Cavalry: prefabToSpawn = cavalryPrefab; break;
                 }
+
                 if (prefabToSpawn != null)
                 {
+                    // Pozisyonu hesapla (5'li sÄ±ralar halinde dizilirler)
                     Vector3 pos = spawnStartPos + new Vector3((index % 5) * 1.5f, (index / 5) * -1.5f, 0);
-                    Instantiate(prefabToSpawn, pos, Quaternion.identity);
+
+                    // Objeyi yarat
+                    GameObject newVet = Instantiate(prefabToSpawn, pos, Quaternion.identity);
+
+                    // --- KÄ°MLÄ°K VE RÃœTBE YÃœKLEME ---
+                    BaseUnit bUnit = newVet.GetComponent<BaseUnit>();
+                    if (bUnit != null)
+                    {
+                        bUnit.unitFullName = vet.unitName; // Eski ismini geri ver
+                        bUnit.currentRank = vet.rank;      // Kaydedilen rÃ¼tbesini ver
+
+                        // GÃ¶rselleri (Rank ikonu ve Emission parlamasÄ±) gÃ¼ncelle
+                        bUnit.UpdateRankVisuals();
+
+                        // Hierarchy'de ismini dÃ¼zelt
+                        newVet.name = "Veteran_" + vet.unitName;
+                    }
                 }
                 index++;
             }
@@ -65,77 +85,106 @@ public class DeploymentManager : MonoBehaviour
 
     private void Update()
     {
-        // Eğer savaş başladıysa artık yerleştirme yapamayız, scripti kapat.
-        if (GameManager.Instance.CurrentState != GameState.Battle)
+        // -----------------------------------------------------------
+        // ğŸ›‘ 1. GÃœVENLÄ°K KAPISI: PAUSE KONTROLÃœ
+        // Oyun durmuÅŸsa (Pause menÃ¼sÃ¼ aÃ§Ä±ksa) hiÃ§bir ÅŸey yapma.
+        // -----------------------------------------------------------
+        if (Time.timeScale == 0f) return;
+
+
+        // -----------------------------------------------------------
+        // ğŸ›‘ 2. GÃœVENLÄ°K KAPISI: UI (BUTON) KONTROLÃœ
+        // Mouse ÅŸu an bir butonun veya panelin Ã¼zerinde mi?
+        // -----------------------------------------------------------
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            // EÄŸer mouse UI Ã¼zerindeyse hayaleti gizle ki oyuncu kafasÄ± karÄ±ÅŸmasÄ±n
+            if (ghostObject) ghostObject.gameObject.SetActive(false);
+
+            // TÄ±klamayÄ± engelle ve fonksiyondan Ã§Ä±k
+            return;
+        }
+
+        // -----------------------------------------------------------
+        // âœ… 3. NORMAL OYUN AKIÅI
+        // SavaÅŸ baÅŸlamadÄ±ysa (Preparation) yerleÅŸtirme yapmaya izin ver
+        // -----------------------------------------------------------
+        if (GameManager.Instance.CurrentState == GameState.Preparation)
         {
             HandlePlacementInput();
         }
         else
         {
-            // Savaş başladıysa hayaleti gizle ve çık
+            // SavaÅŸ baÅŸladÄ±ysa (Battle) hayaleti kapat ve bu scripti devre dÄ±ÅŸÄ± bÄ±rak
             if (ghostObject) ghostObject.gameObject.SetActive(false);
             this.enabled = false;
         }
     }
 
-    // UI Butonları bu fonksiyonu çağıracak
+    // UI ButonlarÄ± (Piyade SeÃ§, OkÃ§u SeÃ§) bu fonksiyonu Ã§aÄŸÄ±rÄ±r
     public void SelectUnitToPlace(string unitType)
     {
         switch (unitType)
         {
-            case "Infantry": 
+            case "Infantry":
                 selectedPrefab = infantryPrefab;
                 currentSelectedCost = infantryCost;
                 break;
-            case "Archer": 
-                selectedPrefab = archerPrefab; 
+            case "Archer":
+                selectedPrefab = archerPrefab;
                 currentSelectedCost = archerCost;
                 break;
-            case "Cavalry": 
-                selectedPrefab = cavalryPrefab; 
+            case "Cavalry":
+                selectedPrefab = cavalryPrefab;
                 currentSelectedCost = cavalryCost;
                 break;
         }
 
-        // Hayaleti aç (İleride sprite'ını da seçili askere göre değiştirebiliriz)
+        // SeÃ§im yapÄ±lÄ±nca hayaleti gÃ¶rÃ¼nÃ¼r yap
         if (ghostObject) ghostObject.gameObject.SetActive(true);
-        Debug.Log($"Seçildi: {unitType} - Fiyat: {currentSelectedCost}");
+        // Debug.Log($"SeÃ§ildi: {unitType} - Fiyat: {currentSelectedCost}");
     }
 
     private void HandlePlacementInput()
     {
+        // EÄŸer henÃ¼z bir asker seÃ§ilmediyse iÅŸlem yapma
         if (selectedPrefab == null) return;
 
-        // 1. Mouse Pozisyonunu Bul
+        // 1. Mouse Pozisyonunu DÃ¼nyadaki Pozisyona Ã‡evir
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePos.z = 0;
+        mousePos.z = 0; // 2D olduÄŸu iÃ§in Z'yi sÄ±fÄ±rla
 
-        // 2. Hayaleti Mouse'a Yapıştır (Görsel Yardımcı)
-        if (ghostObject) ghostObject.position = mousePos;
+        // 2. Hayaleti Mouse'un ucuna taÅŸÄ±
+        if (ghostObject)
+        {
+            ghostObject.gameObject.SetActive(true); // UI'dan Ã§Ä±kÄ±nca tekrar gÃ¶rÃ¼nÃ¼r yap
+            ghostObject.position = mousePos;
+        }
 
-        // 3. Tıklama Kontrolü
+        // 3. Sol TÄ±k KontrolÃ¼ (YerleÅŸtirme)
         if (Input.GetMouseButtonDown(0))
         {
-            // Sadece Spawn Zone içindeyse izin ver
+            // TÄ±klanan yer Spawn Zone (YeÅŸil Alan) iÃ§inde mi?
             if (spawnZoneCollider.OverlapPoint(mousePos))
             {
+                // Para yetiyor mu?
                 if (GameManager.Instance.SpendMoney(currentSelectedCost))
                 {
                     SpawnUnit(mousePos);
                 }
                 else
                 {
-                    Debug.Log("Yetersiz Bakiye");
+                    Debug.Log("âŒ Yetersiz Bakiye!");
+                    // Buraya ileride "Bip" sesi eklenebilir
                 }
             }
             else
             {
-                Debug.Log("Bu alana asker koyamazsın!");
-                // Buraya "Hata Sesi" veya kırmızı yanıp sönme efekti ekleyebilirsin.
+                Debug.Log("ğŸš« Bu alana asker koyamazsÄ±n!");
             }
         }
 
-        // Sağ Tık ile seçimi iptal et
+        // 4. SaÄŸ TÄ±k KontrolÃ¼ (Ä°ptal Etme)
         if (Input.GetMouseButtonDown(1))
         {
             selectedPrefab = null;
@@ -145,10 +194,6 @@ public class DeploymentManager : MonoBehaviour
 
     private void SpawnUnit(Vector3 position)
     {
-        // Askeri Yarat
         Instantiate(selectedPrefab, position, Quaternion.identity);
-
-        // İleride buraya "Para Düşme" veya "Limit Azaltma" kodu ekleyeceğiz.
-        // Şimdilik sınırsız koyalım.
     }
 }

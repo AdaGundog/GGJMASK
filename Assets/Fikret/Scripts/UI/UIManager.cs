@@ -4,22 +4,26 @@ using UnityEngine.SceneManagement;
 public class UIManager : MonoBehaviour
 {
     [Header("Oyun Ýçi Panelleri")]
-    public GameObject infoPanel;      // Para vb. bilgilerin olduðu panel (Info_Panel)
-    public GameObject actionsPanel;   // Butonlarýn olduðu panel (Actions_Panel)
+    public GameObject infoPanel;      // Para vb. bilgilerin olduðu panel
+    public GameObject actionsPanel;   // Butonlarýn olduðu panel
 
     [Header("Oyun Sonu Panelleri")]
     public GameObject victoryPanel;
     public GameObject defeatPanel;
 
+    [Header("Duraklatma (Pause)")]
+    public GameObject pausePanel;     // Pause Paneli buraya
+    private bool isPaused = false;
+
     private void Start()
     {
-        // 1. Oyun Baþlarken:
-        if (infoPanel) infoPanel.SetActive(true);       // Para görünsün
-        if (actionsPanel) actionsPanel.SetActive(true); // Butonlar görünsün
+        // 1. Oyun Baþlarken Temizle:
+        if (infoPanel) infoPanel.SetActive(true);
+        if (actionsPanel) actionsPanel.SetActive(true);
 
-        // Oyun sonu ekranlarý gizli olsun
         if (victoryPanel) victoryPanel.SetActive(false);
         if (defeatPanel) defeatPanel.SetActive(false);
+        if (pausePanel) pausePanel.SetActive(false); // Pause kapalý baþlasýn
 
         // 2. Olaylara Abone Ol
         if (GameManager.Instance != null)
@@ -40,46 +44,92 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        // ESC tuþuna basýlýnca Pause aç/kapa
+        // Ama oyun bittiyse (Zafer/Bozgun) Pause açýlmasýn
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (victoryPanel.activeSelf || defeatPanel.activeSelf) return;
+
+            TogglePause();
+        }
+    }
+
+    // --- PAUSE SÝSTEMÝ ---
+
+    public void TogglePause()
+    {
+        isPaused = !isPaused;
+
+        if (isPaused)
+        {
+            // Duraklat
+            if (pausePanel) pausePanel.SetActive(true);
+            Time.timeScale = 0f; // Zamaný durdur
+        }
+        else
+        {
+            // Devam Et
+            if (pausePanel) pausePanel.SetActive(false);
+            Time.timeScale = 1f; // Zamaný akýt
+        }
+    }
+
+    public void ResumeGame() // Butonla devam etmek için
+    {
+        isPaused = false;
+        if (pausePanel) pausePanel.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
     // --- OLAY YÖNETÝMÝ ---
 
     private void OnBattleStarted()
     {
-        // ÝSTEK 1: Savaþ baþlayýnca sadece para kalsýn, butonlar gitsin.
-        if (infoPanel) infoPanel.SetActive(true);       // Para KALIYOR
+        if (infoPanel) infoPanel.SetActive(true);        // Para KALIYOR
         if (actionsPanel) actionsPanel.SetActive(false); // Butonlar GÝDÝYOR
     }
 
     private void OnVictory()
     {
-        // ÝSTEK 2: Oyun bitince sadece sonuç paneli kalsýn.
-        if (infoPanel) infoPanel.SetActive(false);     // Para GÝDÝYOR
-        if (actionsPanel) actionsPanel.SetActive(false); // Butonlar zaten yoktu ama garanti olsun
+        if (infoPanel) infoPanel.SetActive(false);
+        if (actionsPanel) actionsPanel.SetActive(false);
+        if (pausePanel) pausePanel.SetActive(false); // Pause açýksa kapat
 
-        if (victoryPanel) victoryPanel.SetActive(true); // Sadece ZAFER AÇILIYOR
+        if (victoryPanel) victoryPanel.SetActive(true);
     }
 
     private void OnDefeat()
     {
-        // ÝSTEK 2: Oyun bitince sadece sonuç paneli kalsýn.
-        if (infoPanel) infoPanel.SetActive(false);     // Para GÝDÝYOR
+        if (infoPanel) infoPanel.SetActive(false);
         if (actionsPanel) actionsPanel.SetActive(false);
+        if (pausePanel) pausePanel.SetActive(false); // Pause açýksa kapat
 
-        if (defeatPanel) defeatPanel.SetActive(true);   // Sadece BOZGUN AÇILIYOR
+        if (defeatPanel) defeatPanel.SetActive(true);
     }
 
     // --- BUTON FONKSÝYONLARI ---
+
     public void OnNextLevelClicked()
     {
+        Time.timeScale = 1f; // Emin olmak için zamaný düzelt
         GameManager.Instance.LevelCompleted();
     }
 
     public void OnRetryClicked()
     {
+        Time.timeScale = 1f; // Zamaný düzelt
         GameManager.Instance.RetryLevel();
     }
 
     public void OnMainMenuClicked()
     {
+        Time.timeScale = 1f; // Zamaný düzelt ki menü donuk baþlamasýn
         SceneManager.LoadScene(0);
+    }
+    public void OnQuitClicked()
+    {
+        Application.Quit();
     }
 }

@@ -1,47 +1,42 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class EnemyUnit : BaseUnit
 {
     [Header("Enemy Combat")]
-    public GameObject arrowPrefab; // Inspector'dan ok prefabını buraya sürükle!
+    public GameObject arrowPrefab; // Inspector'dan ok prefabÄ±nÄ± buraya sÃ¼rÃ¼kle!
     private float lastAttackTime;
 
     void Update()
     {
-        // 1. Hedef yoksa yeni birini ara ve dur
-        if (target == null)
+        //  HazÄ±rlÄ±k aÅŸamasÄ±ndaysak dur
+        if (GameManager.Instance.CurrentState != GameState.Battle)
         {
-            FindBestTarget();
-            if (agent.isOnNavMesh) agent.isStopped = true;
+            if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
+            return;
+        }
+
+        if (agent != null) agent.isStopped = false;
+
+        // 1. Hedef kontrolÃ¼: Hedef yoksa veya Ã¶ldÃ¼yse yeni hedef bul
+        if (target == null || target.currentHealth <= 0)
+        {
+            FindBestTarget(); // Senin istediÄŸin sÄ±ralama burada Ã§alÄ±ÅŸÄ±yor
+            if (target == null && agent.isOnNavMesh) agent.isStopped = true;
             return;
         }
 
         float distance = Vector2.Distance(transform.position, target.transform.position);
 
-        // 2. KAÇMA MANTIĞI: Eğer hedef avantajlıysa ve çok yakınsa zıt yöne git
-        if (CheckAdvantage(target.data.type, data.type) && distance < 2.5f)
-        {
-            Vector2 runDirection = (transform.position - target.transform.position).normalized;
-            Vector2 escapePoint = (Vector2)transform.position + runDirection * 3f;
-
-            if (agent.isOnNavMesh)
-            {
-                agent.isStopped = false;
-                agent.SetDestination(escapePoint);
-            }
-            return;
-        }
-
-        // 3. SALDIRI VEYA TAKİP MANTIĞI (Eksik olan kısım burasıydı)
+        // 2. SALDIRI VEYA TAKÄ°P (KaÃ§Ä±ÅŸ kodu silindi!)
         if (distance <= data.attackRange)
         {
-            // Menzildeysek dur ve saldır
+            // Menzile girdiyse dur ve vur
             if (agent.isOnNavMesh) agent.isStopped = true;
             TryAttack();
         }
         else
         {
-            // Menzil dışındaysak hedefe doğru yürü
+            // Menzil dÄ±ÅŸÄ±ndaysa korkmadan Ã¼stÃ¼ne git
             if (agent.isOnNavMesh)
             {
                 agent.isStopped = false;
@@ -50,57 +45,62 @@ public class EnemyUnit : BaseUnit
         }
     }
 
-    void FindBestTarget()
+    public void FindBestTarget()
     {
         PlayerUnit[] players = FindObjectsOfType<PlayerUnit>();
         BaseUnit bestTarget = null;
-        float highestPriority = -Mathf.Infinity;
+        float minDistance = Mathf.Infinity;
 
+        // Ã–nce en kritik grubu bulalÄ±m (Bana saldÄ±ranlar)
+        // EÄŸer okÃ§uysak bu grubu atlayÄ±p direkt avantaj grubuna bakabiliriz (isteÄŸe baÄŸlÄ±)
         foreach (PlayerUnit p in players)
         {
-            float distance = Vector2.Distance(transform.position, p.transform.position);
+            if (p == null || p.currentHealth <= 0) continue;
+            float dist = Vector2.Distance(transform.position, p.transform.position);
+            if (dist > 15f) continue;
 
-            // Çok uzaktaysa bu birimi değerlendirmeye bile alma
-            if (distance > 20f) continue;
-
-            float currentPriority = 0;
-
-            // 1. ÖNCELİK: Mesafe (Temel puan: Yakınlık iyidir)
-            // Mesafeyi ters çeviriyoruz ki yakın olan daha çok puan alsın
-            currentPriority += (20f - distance);
-
-            // 2. ÖNCELİK: Avantajlı olduğu birim (+10 Puan)
-            if (CheckAdvantage(data.type, p.data.type))
+            // GRUP 1: Bana yakÄ±ndan saldÄ±ranlar (En yÃ¼ksek Ã¶ncelik)
+            if (p.target == this && dist < 5f)
             {
-                currentPriority += 10f;
+                if (dist < minDistance) { minDistance = dist; bestTarget = p; }
             }
+        }
 
-            // 3. ÖNCELİK: Ona saldıran birim (+15 Puan)
-            // (Eğer Player'ın hedefi bu düşmansa, player ona saldırıyor demektir)
-            if (p.target == this)
+        // EÄŸer bana saldÄ±ran yoksa GRUP 2'ye bak: AvantajlÄ± olduÄŸum birimler
+        if (bestTarget == null)
+        {
+            minDistance = Mathf.Infinity;
+            foreach (PlayerUnit p in players)
             {
-                currentPriority += 15f;
+                if (p == null || p.currentHealth <= 0) continue;
+                float dist = Vector2.Distance(transform.position, p.transform.position);
+                if (dist > 15f) continue;
+
+                if (CheckAdvantage(data.type, p.data.type))
+                {
+                    if (dist < minDistance) { minDistance = dist; bestTarget = p; }
+                }
             }
+        }
 
-            // 4. DEZAVANTAJ DURUMU: Kaçma Mantığı
-            // Eğer dezavantajlı olduğu birim çok yakınsa (örn: 3 birim), önceliği düşür
-            if (CheckAdvantage(p.data.type, data.type) && distance < 3f)
+        // O da yoksa GRUP 3: Geri kalan her ÅŸey (DezavantajlÄ± dahil en yakÄ±n birim)
+        if (bestTarget == null)
+        {
+            minDistance = Mathf.Infinity;
+            foreach (PlayerUnit p in players)
             {
-                currentPriority -= 20f;
-                // Eğer çok tehlikeliyse kaçma moduna geç (Aşağıda açıklayacağım)
-            }
+                if (p == null || p.currentHealth <= 0) continue;
+                float dist = Vector2.Distance(transform.position, p.transform.position);
+                if (dist > 15f) continue;
 
-            if (currentPriority > highestPriority)
-            {
-                highestPriority = currentPriority;
-                bestTarget = p;
+                if (dist < minDistance) { minDistance = dist; bestTarget = p; }
             }
         }
 
         target = bestTarget;
     }
 
-    // Yardımcı fonksiyon: Tip avantajını kontrol eder
+    // YardÄ±mcÄ± fonksiyon: Tip avantajÄ±nÄ± kontrol eder
     bool CheckAdvantage(UnitType attacker, UnitType defender)
     {
         if (attacker == UnitType.Archer && defender == UnitType.Infantry) return true;
@@ -113,7 +113,7 @@ public class EnemyUnit : BaseUnit
     {
         if (Time.time >= lastAttackTime + data.attackRate)
         {
-            // Eğer düşman verisinde tipi okçu olarak ayarlandıysa
+            // EÄŸer dÃ¼ÅŸman verisinde tipi okÃ§u olarak ayarlandÄ±ysa
             if (data.type == UnitType.Archer && arrowPrefab != null)
             {
                 // Oku yarat
@@ -121,11 +121,11 @@ public class EnemyUnit : BaseUnit
 
                 // Oku hedefe (oyuncuya) odakla
                 arrowObj.GetComponent<Projectile>().Setup(target, data.attackDamage, data.type, currentRank);
-                Debug.Log(gameObject.name + " ok fırlattı!");
+                Debug.Log(gameObject.name + " ok fÄ±rlattÄ±!");
             }
             else
             {
-                // Yakın dövüşçü ise doğrudan hasar ver
+                // YakÄ±n dÃ¶vÃ¼ÅŸÃ§Ã¼ ise doÄŸrudan hasar ver
                 target.TakeDamage(data.attackDamage, data.type, currentRank);
             }
 

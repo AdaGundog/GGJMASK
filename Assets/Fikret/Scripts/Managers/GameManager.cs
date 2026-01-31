@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using LevelEditor; // EnemyType için
 using UnityEngine.SceneManagement; // Sahne yenilemek için şart
 
+
 public enum GameState
 {
     Preparation, // Asker yerleştirme
@@ -12,16 +13,20 @@ public enum GameState
     Defeat       // Kaybettik
 }
 
-[Serializable]
+[System.Serializable]
 public class VeteranData
 {
-    public EnemyType type;
+    public UnitType type; // EnemyType yerine UnitType yapıldı
     public int rank;
+    public string unitName;
+    public float savedHealth;
 
-    public VeteranData(EnemyType t, int r)
+    public VeteranData(UnitType t, int r, string name, float hp)
     {
         type = t;
         rank = r;
+        unitName = name;
+        savedHealth = hp;
     }
 }
 
@@ -120,13 +125,26 @@ public class GameManager : MonoBehaviour
         veterans.Clear();
         foreach (GameObject unit in survivors)
         {
-            BaseUnit baseUnit = unit.GetComponent<BaseUnit>(); // Senin scriptin
+            BaseUnit bUnit = unit.GetComponent<BaseUnit>();
             UnitRegistration reg = unit.GetComponent<UnitRegistration>();
 
-            if (baseUnit != null && reg != null)
+            if (bUnit != null && reg != null)
             {
-                // Hem tipi hem de senin rütbe verini kaydediyoruz
-                veterans.Add(new VeteranData(reg.unitType, baseUnit.currentRank));
+                // 1. ADIM: Birimin kendi içindeki rütbesini fiziksel olarak artır (Max 3)
+                bUnit.currentRank = Mathf.Min(bUnit.currentRank + 1, 3);
+
+                // 2. ADIM: Birimin görselini (Rank ikonunu) ve varsa Emission (parlama) değerini güncelle
+                bUnit.UpdateRankVisuals();
+
+                // 3. ADIM: Şimdi bu güncellenmiş (artırılmış) rütbeyi VeteranData olarak kaydet
+                veterans.Add(new VeteranData(
+                    bUnit.data.type,
+                    bUnit.currentRank,
+                    bUnit.unitFullName,
+                    bUnit.currentHealth
+                ));
+
+                Debug.Log($"{bUnit.unitFullName} terfi etti! Yeni Rank: {bUnit.currentRank}");
             }
         }
     }

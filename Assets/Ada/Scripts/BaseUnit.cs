@@ -24,7 +24,18 @@ public abstract class BaseUnit : MonoBehaviour
     public Sprite rank3Sprite; // Üç þeritli/Yýldýzlý simge
 
     [Header("Unit Info")]
-    private string unitFullName;
+    public string unitFullName;
+
+    [Header("Rank Progression Settings")]
+
+    [Tooltip("Her rütbede eklenecek ekstra can (Örn: 20f her rankta +20 HP verir)")]
+    public float hpBonusPerRank = 20f;
+
+    [Tooltip("Her rütbede hasar ne kadar artsýn? (Örn: 0.2f her rankta %20 artýþ saðlar)")]
+    public float damageMultiplierPerRank = 0.2f;
+
+    [Tooltip("Her rütbede alýnan hasar ne kadar azalsýn? (Örn: 0.1f her rankta %10 tanklýk saðlar)")]
+    public float tankinessPerRank = 0.1f;
 
     public virtual void Awake()
     {
@@ -36,7 +47,7 @@ public abstract class BaseUnit : MonoBehaviour
         agent.updateUpAxis = false;
         agent.speed = data.moveSpeed;
     }
-    public virtual void Start()
+    protected virtual void Start()
     {
         // Eðer isim atanmamýþsa NamingSystem'dan çek
         if (string.IsNullOrEmpty(unitFullName))
@@ -51,37 +62,54 @@ public abstract class BaseUnit : MonoBehaviour
     {
         float finalDamage = amount;
 
-        // 1. SALDIRGAN RÜTBE BONUSU (Vuran birim rütbeliyse hasarý artýrýr)
-        // Rank 1: x1.0 | Rank 2: x1.2 | Rank 3: x1.4 hasar verir.
-        float attackerMultiplier = 1f + ((attackerRank - 1) * 0.2f);
+        // 1. SALDIRGAN RÜTBE BONUSU (Saldýrganýn rütbesine göre vurduðu hasar artar)
+        // Senin Inspector'dan belirlediðin 'damageMultiplierPerRank' deðerini kullanýr.
+        float attackerMultiplier = 1f + ((attackerRank - 1) * damageMultiplierPerRank);
         finalDamage *= attackerMultiplier;
 
-        // 2. TAÞ-KAÐIT-MAKAS DENGESÝ (Avantajlý tip %50 fazla vurur)
-        if (attackerType == UnitType.Archer && data.type == UnitType.Infantry) finalDamage *= 1.5f;
-        else if (attackerType == UnitType.Infantry && data.type == UnitType.Cavalry) finalDamage *= 1.5f;
-        else if (attackerType == UnitType.Cavalry && data.type == UnitType.Archer) finalDamage *= 1.5f;
+        // 2. TAÞ-KAÐIT-MAKAS DENGESÝ & YAVAÞLATMA
+        if (attackerType == UnitType.Archer && data.type == UnitType.Infantry)
+        {
+            finalDamage *= 1.5f;
+        }
+        else if (attackerType == UnitType.Infantry && data.type == UnitType.Cavalry)
+        {
+            finalDamage *= 1.5f;
+            // Piyade Atlýya vurursa yavaþlatma mekaniði
+            SlowDown(1f, 0.5f);
+        }
+        else if (attackerType == UnitType.Cavalry && data.type == UnitType.Archer)
+        {
+            finalDamage *= 1.5f;
+        }
 
-        // 3. SAVUNMA RÜTBE BONUSU (Hasar alan birim rütbeliyse daha az hasar alýr)
-        // Rank 1: %0 koruma | Rank 2: %10 koruma | Rank 3: %20 koruma.
-        float defenseMultiplier = 1f - ((currentRank - 1) * 0.1f);
-        finalDamage *= defenseMultiplier;
+        // 3. SAVUNMA (TANKLIK) RÜTBE BONUSU (Bizim rütbemize göre aldýðýmýz hasar azalýr)
+        // Senin Inspector'dan belirlediðin 'tankinessPerRank' deðerini kullanýr.
+        float defenseMultiplier = 1f - ((currentRank - 1) * tankinessPerRank);
+        // Hasarýn saçma bir þekilde eksiye düþmemesi veya 0 olmamasý için en az %10'unu almasýný saðlýyoruz.
+        finalDamage *= Mathf.Max(0.1f, defenseMultiplier);
 
         // Caný azalt
         currentHealth -= finalDamage;
 
-        // UI GÜNCELLEME
+        // 4. ÝNTÝKAM MANTIÐI (Sadece Düþmanlar için)
+        if (currentHealth > 0 && this is EnemyUnit && target == null)
+        {
+            ((EnemyUnit)this).FindBestTarget();
+        }
+
+        // 5. UI GÜNCELLEME
         if (healthBarGroup != null)
-    {
-        // Rütbe simgesine dokunmadan sadece can barýný gösteriyoruz
-        healthBarGroup.SetActive(true);
-        
-        // Can barý oranýný güncelle
-        healthBarFill.fillAmount = currentHealth / data.maxHealth;
-        
-        // 3 saniye sonra can barýný kapatmasý için (Opsiyonel)
-        CancelInvoke("HideHealthBar");
-        Invoke("HideHealthBar", 3f);
-    }
+        {
+            healthBarGroup.SetActive(true);
+
+            // Rütbe bonusuyla artan caný doðru orantýlamak için:
+            float totalMaxHP = data.maxHealth + ((currentRank - 1) * hpBonusPerRank);
+            healthBarFill.fillAmount = currentHealth / totalMaxHP;
+
+            CancelInvoke("HideHealthBar");
+            Invoke("HideHealthBar", 3f);
+        }
 
         if (currentHealth <= 0) Die();
     }
@@ -105,8 +133,36 @@ public abstract class BaseUnit : MonoBehaviour
 
         // Rank 1 ise simgeyi gizleyebiliriz (isteðe baðlý)
         rankIconImage.gameObject.SetActive(currentRank > 1);
+
+        float extraHP = (currentRank - 1) * hpBonusPerRank;
+
+        // Eðer birim hayattaysa, rütbe alýnca canýný da biraz dolduralým:
+        currentHealth = Mathf.Min(currentHealth + hpBonusPerRank, data.maxHealth + extraHP);
+
+        Debug.Log($"{unitFullName} yeni rütbe ile güçlendi. Yeni Max Can: {data.maxHealth + extraHP}");
+    }
+    public void SlowDown(float amount, float duration)
+    {
+        // Eðer zaten yavaþlatýlmýþsa (veya ölüyse) iþlemi tekrarlama
+        if (agent == null || !agent.isOnNavMesh) return;
+
+        // Orijinal hýzý sakla (BaseUnit'te data.moveSpeed olduðunu varsayýyorum)
+        float originalSpeed = data.moveSpeed;
+
+        // Hýzý düþür (En az 0.1 olsun ki tamamen çakýlmasýn)
+        agent.speed = Mathf.Max(0.1f, agent.speed - amount);
+
+        // Süre bitince hýzý geri yüklemek için "ResetSpeed" çaðýr
+        Invoke("ResetSpeed", duration);
     }
 
+    private void ResetSpeed()
+    {
+        if (agent != null)
+        {
+            agent.speed = data.moveSpeed;
+        }
+    }
     protected virtual void Die()
     {
         // SelectionManager listesinden kendini temizlemesi için bir event veya doðrudan eriþim

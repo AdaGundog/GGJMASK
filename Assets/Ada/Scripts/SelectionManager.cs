@@ -59,7 +59,8 @@ public class SelectionManager : MonoBehaviour
             {
                 ClearSelection();
                 selectedUnits.Add(unit);
-                unit.isSelected = true;
+                // unit.isSelected = true; <-- BUNU SÝL
+                unit.SetSelection(true); // BU SATIRI EKLE (Halkayý Mavi yapar)
                 return true;
             }
         }
@@ -156,14 +157,18 @@ public class SelectionManager : MonoBehaviour
             if (screenPos.x > realMin.x && screenPos.x < realMax.x && screenPos.y > realMin.y && screenPos.y < realMax.y)
             {
                 selectedUnits.Add(unit);
-                unit.isSelected = true;
+                // unit.isSelected = true; <-- BUNU SÝL
+                unit.SetSelection(true); // BU SATIRI EKLE (Halkayý Mavi yapar)
             }
         }
     }
 
     void ClearSelection()
     {
-        foreach (var unit in selectedUnits) unit.isSelected = false;
+        foreach (var unit in selectedUnits)
+        {
+            if (unit != null) unit.SetSelection(false); // Halkayý Yeþil yapar
+        }
         selectedUnits.Clear();
     }
 }
