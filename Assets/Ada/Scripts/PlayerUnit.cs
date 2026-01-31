@@ -4,6 +4,9 @@ using UnityEngine.AI;
 
 public class PlayerUnit : BaseUnit
 {
+
+    public UnitType type;
+
     public bool isSelected;
     private float lastAttackTime;
     public GameObject arrowPrefab; // Inspector'dan hazýrladýðýn prefab'ý buraya sürükle
