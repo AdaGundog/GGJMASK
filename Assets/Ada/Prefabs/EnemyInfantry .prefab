@@ -89,6 +89,7 @@ GameObject:
   - component: {fileID: 3380776413798712906}
   - component: {fileID: 4242345180965658690}
   - component: {fileID: 4039758495643485162}
+  - component: {fileID: 7732947012818461620}
   m_Layer: 6
   m_Name: 'EnemyInfantry '
   m_TagString: Untagged
@@ -284,6 +285,20 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
+--- !u!114 &7732947012818461620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4928925506106156901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 380072f16fff53a46ab7828e4241951c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isPlayerUnit: 0
+  unitType: 0
 --- !u!1 &5096837712627221939
 GameObject:
   m_ObjectHideFlags: 0
