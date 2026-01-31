@@ -36,7 +36,7 @@ public abstract class BaseUnit : MonoBehaviour
         agent.updateUpAxis = false;
         agent.speed = data.moveSpeed;
     }
-    public virtual void Start()
+    protected virtual void Start()
     {
         // Eðer isim atanmamýþsa NamingSystem'dan çek
         if (string.IsNullOrEmpty(unitFullName))
