@@ -150,7 +150,7 @@ public abstract class BaseUnit : MonoBehaviour
             {
                 nameText.text = unitFullName; // Birimin adýný yazdýr
                 nameText.gameObject.SetActive(true); // Ýsmi görünür yap
-                nameText.color = new Color(1f, 0.85f, 0f); // Altýn sarýsý yap
+                
             }
         }
         else

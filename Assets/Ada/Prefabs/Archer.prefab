@@ -188,6 +188,7 @@ MonoBehaviour:
   tiltAmount: 15
   tiltDuration: 0.1
   target: {fileID: 0}
+  nameText: {fileID: 2384393234025346147}
   currentRank: 1
   rankIconImage: {fileID: 7735177890463278175}
   rank1Sprite: {fileID: 21300000, guid: c6018daec0678e24691353c701a925af, type: 3}

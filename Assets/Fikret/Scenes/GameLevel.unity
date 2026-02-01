@@ -11472,7 +11472,7 @@ Transform:
   m_GameObject: {fileID: 953744767}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.118735, y: 1.5907507, z: -9.951522}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14768,7 +14768,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5553230178912648970, guid: a45e2d1381e38214daba76e18070bdff, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14829,7 +14829,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5893598840097163745, guid: 75efd82cbe3258c40a28d3e754d74569, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14901,9 +14901,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2030362932}
     - target: {fileID: 7346690684856731266, guid: aaa975a6359ee2c4b8f69a02aa962f9d, type: 3}
+      propertyPath: costPerTile
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7346690684856731266, guid: aaa975a6359ee2c4b8f69a02aa962f9d, type: 3}
       propertyPath: gameManager
       value: 
       objectReference: {fileID: 1577975030}
+    - target: {fileID: 7346690684856731266, guid: aaa975a6359ee2c4b8f69a02aa962f9d, type: 3}
+      propertyPath: tileLifetime
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 7346690684856731266, guid: aaa975a6359ee2c4b8f69a02aa962f9d, type: 3}
       propertyPath: navMeshSurface
       value: 
@@ -14971,7 +14979,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2348181011570149791, guid: 87d94b7b0f1310145a027ae863b91063, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15044,7 +15052,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8973665239093047006, guid: 31e72352dd6ffe443be2c14defde6a4e, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

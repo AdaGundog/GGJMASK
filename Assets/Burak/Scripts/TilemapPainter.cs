@@ -18,7 +18,7 @@ public class TilemapPainter : MonoBehaviour
 
     [Header("Murekkep Ayarlari")]
     // Artik kendi ink'i yok, GameManager'dan aliyor
-    public int costPerTile = 1;
+    public float costPerTile = 0.25f;
 
     [Header("Firca Ayarlari")]
     public int brushRadius = 2;

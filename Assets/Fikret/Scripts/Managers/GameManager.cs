@@ -2,14 +2,14 @@
 using System;
 using System.Collections.Generic;
 using LevelEditor; // EnemyType için
-using UnityEngine.SceneManagement; // Sahne yenilemek için şart
+using UnityEngine.SceneManagement;
 
 public enum GameState
 {
-    Preparation, // Asker yerleştirme
-    Battle,      // Savaş başladı
-    Victory,     // Kazandık
-    Defeat       // Kaybettik
+    Preparation,
+    Battle,
+    Victory,
+    Defeat
 }
 
 [Serializable]
@@ -17,7 +17,7 @@ public class VeteranData
 {
     public EnemyType type;
     public int rank;
-    public string unitName; // Karakterin adını burada tutacağız
+    public string unitName;
 
     public VeteranData(EnemyType t, int r, string n)
     {
@@ -26,23 +26,22 @@ public class VeteranData
         unitName = n;
     }
 }
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public GameState CurrentState { get; private set; }
-    // --- YENİ: LEVEL SAYACI ---
     public int currentLevelIndex = 1;
 
     public event Action OnBattleStarted;
-    public event Action<int> OnMoneyChanged;
+    public event Action<int> OnMoneyChanged; // UI int beklediği için int kaldı
     public event Action OnVictory;
     public event Action OnDefeat;
 
     [Header("Economy")]
     public int startingMoney = 1000;
-    public int CurrentMoney { get; private set; }
+    public float CurrentMoney { get; private set; } // Hassas hesaplama için float
 
-    // Gaziler Listesi
     public List<VeteranData> veterans = new List<VeteranData>();
 
     private void Awake()
@@ -50,7 +49,7 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Ölümsüz GameManager
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -61,17 +60,14 @@ public class GameManager : MonoBehaviour
         CurrentMoney = startingMoney;
     }
 
-    // --- YENİ: LEVEL BİTİRME FONKSİYONU ---
     public void LevelCompleted()
     {
         Debug.Log("🎉 LEVEL TAMAMLANDI!");
         currentLevelIndex++;
         CurrentState = GameState.Preparation;
 
-        // --- BU SATIRI SİLDİK VEYA YORUMA ALDIK ---
-        // CurrentMoney = startingMoney; 
+        // CurrentMoney = startingMoney; // Birikimli sistem için kapalı
 
-        // Listeleri temizle ve sahneyi yeniden yükle
         if (UnitManager.Instance != null)
         {
             UnitManager.Instance.activePlayerUnits.Clear();
@@ -92,22 +88,21 @@ public class GameManager : MonoBehaviour
     public void AddMoney(int amount)
     {
         CurrentMoney += amount;
-        // UI'daki yazıların (Text) güncellenmesi için event'i tetikle
-        OnMoneyChanged?.Invoke(CurrentMoney);
+        // Float'ı int'e çevirip UI'a gönderiyoruz
+        OnMoneyChanged?.Invoke((int)CurrentMoney);
     }
 
-    public bool SpendMoney(int amount)
+    public bool SpendMoney(float amount)
     {
         if (CurrentMoney >= amount)
         {
             CurrentMoney -= amount;
-            OnMoneyChanged?.Invoke(CurrentMoney);
+            OnMoneyChanged?.Invoke((int)CurrentMoney);
             return true;
         }
         return false;
     }
 
-    // GameManager.cs içinde güncelle
     public void SaveSurvivors(List<GameObject> survivors)
     {
         veterans.Clear();
@@ -118,47 +113,38 @@ public class GameManager : MonoBehaviour
 
             if (baseUnit != null && reg != null)
             {
-                // RÜTBE ATLATMA
-                if (baseUnit.currentRank < 4) // Sınırı 4'e çektik
+                if (baseUnit.currentRank < 4) // Efsanevi rütbe sınırı
                 {
                     baseUnit.currentRank++;
                 }
 
-                // Artık ismiyle beraber kaydediyoruz
-                // Not: Eğer birimin Inspector'da yazdığın bir adı varsa 'baseUnit.unitFullName' kullan
                 string nameToSave = string.IsNullOrEmpty(baseUnit.unitFullName) ? unit.name : baseUnit.unitFullName;
-
                 veterans.Add(new VeteranData((EnemyType)reg.unitType, baseUnit.currentRank, nameToSave));
 
-                Debug.Log($"{nameToSave} gazi olarak kaydedildi. Yeni Rütbe: {baseUnit.currentRank}");
+                Debug.Log($"{nameToSave} rütbe aldı: {baseUnit.currentRank}");
             }
         }
     }
-    // UnitManager buradan çağıracak
+
     public void TriggerVictory()
     {
-        if (CurrentState == GameState.Victory) return; // Zaten kazandık
+        if (CurrentState == GameState.Victory) return;
         CurrentState = GameState.Victory;
-
-        Debug.Log("🏆 ZAFER DUYURULDU!");
-        OnVictory?.Invoke(); // UI bunu duyup paneli açacak
+        OnVictory?.Invoke();
     }
 
     public void TriggerDefeat()
     {
         if (CurrentState == GameState.Defeat) return;
         CurrentState = GameState.Defeat;
-
-        Debug.Log("❌ BOZGUN DUYURULDU!");
-        OnDefeat?.Invoke(); // UI bunu duyup paneli açacak
+        OnDefeat?.Invoke();
     }
 
     public void RetryLevel()
     {
-        // Kaybedince tekrar deneme mantığı
         CurrentState = GameState.Preparation;
         CurrentMoney = startingMoney;
-        OnMoneyChanged?.Invoke(CurrentMoney);
+        OnMoneyChanged?.Invoke((int)CurrentMoney);
 
         if (UnitManager.Instance != null)
         {
