@@ -194,29 +194,50 @@ public class TilemapPainter : MonoBehaviour
         // Tum dusmanlari bul
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("EnemyUnit");
         int updatedCount = 0;
+        int repositionedCount = 0;
 
         foreach (GameObject enemy in enemies)
         {
             UnityEngine.AI.NavMeshAgent agent = enemy.GetComponent<UnityEngine.AI.NavMeshAgent>();
-            if (agent != null && agent.isOnNavMesh)
+            if (agent != null)
             {
-                // Mevcut hedefi sakla
-                Vector3 currentDestination = agent.destination;
-                
-                // Path'i sifirla ve yeniden hesaplat
-                agent.ResetPath();
-                
-                // Eger bir hedefi varsa, yeniden ayarla (NavMesh guncellendiginde yeni path hesaplanir)
-                if (currentDestination != Vector3.zero)
+                // Eger NavMesh'te degilse, en yakin NavMesh noktasina koy
+                if (!agent.isOnNavMesh)
                 {
-                    agent.SetDestination(currentDestination);
+                    UnityEngine.AI.NavMeshHit hit;
+                    if (UnityEngine.AI.NavMesh.SamplePosition(enemy.transform.position, out hit, 5.0f, UnityEngine.AI.NavMesh.AllAreas))
+                    {
+                        agent.Warp(hit.position); // Dusmani NavMesh'e isınla
+                        repositionedCount++;
+                        Debug.Log($"[TilemapPainter] {enemy.name} NavMesh'e yeniden yerlestirildi");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[TilemapPainter] {enemy.name} icin yakin NavMesh noktasi bulunamadi!");
+                    }
                 }
-                
-                updatedCount++;
+
+                // Path'i yeniden hesaplat
+                if (agent.isOnNavMesh)
+                {
+                    // Mevcut hedefi sakla
+                    Vector3 currentDestination = agent.destination;
+                    
+                    // Path'i sifirla ve yeniden hesaplat
+                    agent.ResetPath();
+                    
+                    // Eger bir hedefi varsa, yeniden ayarla (NavMesh guncellendiginde yeni path hesaplanir)
+                    if (currentDestination != Vector3.zero)
+                    {
+                        agent.SetDestination(currentDestination);
+                    }
+                    
+                    updatedCount++;
+                }
             }
         }
 
-        Debug.Log($"[TilemapPainter] {updatedCount} dusmanin path'i guncellendi!");
+        Debug.Log($"[TilemapPainter] {updatedCount} dusmanin path'i guncellendi, {repositionedCount} dusman yeniden yerlestirildi!");
     }
 
     void UpdateTilesLifecycle()

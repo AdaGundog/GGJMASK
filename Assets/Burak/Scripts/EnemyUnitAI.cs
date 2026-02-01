@@ -76,6 +76,13 @@ public class EnemyUnitAI : MonoBehaviour
 
     void FindAndEngageTarget()
     {
+        // NavMesh kontrolu - eger NavMesh'te degilse hareket etme
+        if (!agent.isOnNavMesh)
+        {
+            Debug.LogWarning($"[EnemyUnitAI] {name} NavMesh'te degil! Yeniden yerlestirilmesi gerekiyor.");
+            return;
+        }
+
         if (currentTarget == null || !currentTarget.gameObject.activeInHierarchy)
         {
             currentTarget = ScanForTarget();
@@ -83,7 +90,10 @@ public class EnemyUnitAI : MonoBehaviour
 
         if (currentTarget == null)
         {
-            agent.SetDestination(enemyCastle.position);
+            if (agent.isOnNavMesh) // Guvenlik kontrolu
+            {
+                agent.SetDestination(enemyCastle.position);
+            }
             return;
         }
 
@@ -91,12 +101,18 @@ public class EnemyUnitAI : MonoBehaviour
 
         if (distanceToTarget <= attackRange)
         {
-            agent.ResetPath();
+            if (agent.isOnNavMesh) // Guvenlik kontrolu
+            {
+                agent.ResetPath();
+            }
             Attack(currentTarget);
         }
         else
         {
-            agent.SetDestination(currentTarget.position);
+            if (agent.isOnNavMesh) // Guvenlik kontrolu
+            {
+                agent.SetDestination(currentTarget.position);
+            }
         }
     }
 
