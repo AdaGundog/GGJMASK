@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1628662460593436644
+--- !u!1 &764472070097037307
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,24 +8,24 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2381810216114063526}
-  - component: {fileID: 7701986395748284734}
-  - component: {fileID: 2425888644576503157}
+  - component: {fileID: 5841966907666867921}
+  - component: {fileID: 344171518226856432}
+  - component: {fileID: 6506869099483204558}
   m_Layer: 5
   m_Name: HealthBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &2381810216114063526
+  m_IsActive: 1
+--- !u!224 &5841966907666867921
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1628662460593436644}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_GameObject: {fileID: 764472070097037307}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -34,24 +34,24 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1, y: 0.2}
+  m_AnchoredPosition: {x: 0.02195, y: 0.09460008}
+  m_SizeDelta: {x: 0.8983, y: 0.0489}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &7701986395748284734
+--- !u!222 &344171518226856432
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1628662460593436644}
+  m_GameObject: {fileID: 764472070097037307}
   m_CullTransparentMesh: 1
---- !u!114 &2425888644576503157
+--- !u!114 &6506869099483204558
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1628662460593436644}
+  m_GameObject: {fileID: 764472070097037307}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -184,8 +184,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data: {fileID: 11400000, guid: 31b279320af1c3946803d8de7d55d963, type: 2}
   currentHealth: 0
-  healthBarGroup: {fileID: 1628662460593436644}
-  healthBarFill: {fileID: 2425888644576503157}
+  healthBarGroup: {fileID: 764472070097037307}
+  healthBarFill: {fileID: 6506869099483204558}
   tiltAmount: 15
   tiltDuration: 0.1
   target: {fileID: 0}
@@ -195,7 +195,7 @@ MonoBehaviour:
   rank2Sprite: {fileID: 21300000, guid: 552609d7b6a3fa04c8dd21c371499765, type: 3}
   rank3Sprite: {fileID: 21300000, guid: 79a985b7e9ffdb144b5b314a94366403, type: 3}
   unitFullName: 
-  hpBonusPerRank: 20
+  hpBonusPerRank: 3
   damageMultiplierPerRank: 0.2
   tankinessPerRank: 0.1
   arrowPrefab: {fileID: 0}
@@ -293,6 +293,81 @@ MonoBehaviour:
   currentHealth: 0
   attackRange: 1.8
   attackCooldown: 0.8
+--- !u!1 &2813229143207297946
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8055494939638937187}
+  - component: {fileID: 5482000179448797461}
+  - component: {fileID: 8336181408041738601}
+  m_Layer: 5
+  m_Name: HealthBarCover
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8055494939638937187
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2813229143207297946}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 658897559693261027}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0.02195, y: 0.09460008}
+  m_SizeDelta: {x: 0.9561, y: 0.632}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &5482000179448797461
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2813229143207297946}
+  m_CullTransparentMesh: 1
+--- !u!114 &8336181408041738601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2813229143207297946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 50b944097a77447439b97b9f7a1b65e8, type: 3}
+  m_Type: 3
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 0
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &3470374963599997240
 GameObject:
   m_ObjectHideFlags: 0
@@ -596,14 +671,15 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2381810216114063526}
   - {fileID: 5868698509127127077}
+  - {fileID: 8055494939638937187}
+  - {fileID: 5841966907666867921}
   m_Father: {fileID: 2829227544023243870}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0.564}
-  m_SizeDelta: {x: 1, y: 0.2}
+  m_AnchoredPosition: {x: 0, y: 0.4554}
+  m_SizeDelta: {x: 1, y: 0.1107}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &569780645943953280
 Canvas:

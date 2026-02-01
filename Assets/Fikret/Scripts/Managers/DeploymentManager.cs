@@ -38,7 +38,7 @@ public class DeploymentManager : MonoBehaviour
     {
         if (GameManager.Instance.veterans.Count > 0)
         {
-            Debug.Log("Gaziler sahneye yerleştiriliyor...");
+            Debug.Log("🚀 Gaziler eski isimleri ve rütbeleriyle geliyor...");
 
             Vector3 spawnStartPos = spawnZoneCollider.bounds.center;
             spawnStartPos.x -= spawnZoneCollider.bounds.extents.x * 0.8f;
@@ -48,7 +48,6 @@ public class DeploymentManager : MonoBehaviour
             {
                 GameObject prefabToSpawn = null;
 
-                // EnemyType ve UnitType aynı değerlere sahip, cast yapıyoruz
                 switch ((UnitType)vet.type)
                 {
                     case UnitType.Infantry: prefabToSpawn = infantryPrefab; break;
@@ -58,23 +57,21 @@ public class DeploymentManager : MonoBehaviour
 
                 if (prefabToSpawn != null)
                 {
-                    // Pozisyonu hesapla (5'li sıralar halinde dizilirler)
                     Vector3 pos = spawnStartPos + new Vector3((index % 5) * 1.5f, (index / 5) * -1.5f, 0);
-
-                    // Objeyi yarat
                     GameObject newVet = Instantiate(prefabToSpawn, pos, Quaternion.identity);
 
-                    // --- KİMLİK VE RÜTBE YÜKLEME ---
+                    // --- KİMLİK, İSİM VE RÜTBE YÜKLEME ---
                     BaseUnit bUnit = newVet.GetComponent<BaseUnit>();
                     if (bUnit != null)
                     {
-                        // VeteranData'da unitName yok, yeni isim oluştur
-                        bUnit.currentRank = vet.rank;      // Kaydedilen rütbesini ver
+                        // ARTIK İSMİ VAR! GameManager'dan gelen ismi atıyoruz.
+                        bUnit.unitFullName = vet.unitName;
+                        bUnit.currentRank = vet.rank;
 
-                        // Görselleri (Rank ikonu ve Emission parlaması) güncelle
+                        // Görselleri güncelle (Yıldızlar, can barı oranları vs.)
                         bUnit.UpdateRankVisuals();
 
-                        // Hierarchy'de ismini düzelt
+                        // Hierarchy'de "Veteran_Levent" gibi görünmesi için
                         newVet.name = "Veteran_" + bUnit.unitFullName;
                     }
                 }
