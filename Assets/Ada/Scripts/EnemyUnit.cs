@@ -3,27 +3,40 @@
 public class EnemyUnit : BaseUnit
 {
     [Header("Enemy Combat")]
-    public GameObject arrowPrefab; // Inspector'dan ok prefabını buraya sürükle!
+    public GameObject arrowPrefab;
     private float lastAttackTime;
 
     [Header("Weapon Visuals")]
-    public Transform spearTransform; // Inspector'dan düşmanın mızrağını buraya koy
+    public Transform spearTransform;
     public float pokeDistance = 0.6f;
     public float pokeSpeed = 0.05f;
     private Vector3 spearOriginalPos;
 
+    // --- SES DEĞİŞKENİ ---
+    private AudioSource audioSource;
+
     protected override void Start()
     {
         base.Start();
-        // Mızrağı başta gizle ve yerini kaydet
         if (spearTransform != null)
         {
             spearOriginalPos = spearTransform.localPosition;
             spearTransform.gameObject.SetActive(false);
         }
+
+        // --- SES AYARLARI ---
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource != null)
+        {
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+        }
     }
+
     void Update()
     {
+        // --- SES KONTROLÜ ---
+        HandleMovementSound();
+
         //  Hazırlık aşamasındaysak dur
         if (GameManager.Instance.CurrentState != GameState.Battle)
         {
@@ -33,30 +46,51 @@ public class EnemyUnit : BaseUnit
 
         if (agent != null) agent.isStopped = false;
 
-        // 1. Hedef kontrolü: Hedef yoksa veya öldüyse yeni hedef bul
+        // 1. Hedef kontrolü
         if (target == null || target.currentHealth <= 0)
         {
-            FindBestTarget(); // Senin istediğin sıralama burada çalışıyor
+            FindBestTarget();
             if (target == null && agent.isOnNavMesh) agent.isStopped = true;
             return;
         }
 
         float distance = Vector2.Distance(transform.position, target.transform.position);
 
-        // 2. SALDIRI VEYA TAKİP (Kaçış kodu silindi!)
+        // 2. SALDIRI VEYA TAKİP
         if (distance <= data.attackRange)
         {
-            // Menzile girdiyse dur ve vur
             if (agent.isOnNavMesh) agent.isStopped = true;
             TryAttack();
         }
         else
         {
-            // Menzil dışındaysa korkmadan üstüne git
             if (agent.isOnNavMesh)
             {
                 agent.isStopped = false;
                 agent.SetDestination(target.transform.position);
+            }
+        }
+    }
+
+    // --- YENİ EKLENEN SES FONKSİYONU ---
+    void HandleMovementSound()
+    {
+        if (audioSource == null || agent == null) return;
+
+        // NavMeshAgent hızıyla kontrol ediyoruz
+        if (agent.velocity.sqrMagnitude > 0.1f)
+        {
+            if (!audioSource.isPlaying)
+            {
+                audioSource.time = Random.Range(0f, audioSource.clip.length);
+                audioSource.Play();
+            }
+        }
+        else
+        {
+            if (audioSource.isPlaying)
+            {
+                audioSource.Pause();
             }
         }
     }
@@ -67,7 +101,6 @@ public class EnemyUnit : BaseUnit
 
         spearTransform.gameObject.SetActive(true);
 
-        // Düşmanın mızrağını bizim birliğimize doğru döndür
         Vector3 direction = (target.transform.position - transform.position).normalized;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         spearTransform.rotation = Quaternion.Euler(0, 0, angle);
@@ -75,7 +108,6 @@ public class EnemyUnit : BaseUnit
         Vector3 startPos = spearOriginalPos;
         Vector3 punchPos = spearOriginalPos + new Vector3(pokeDistance, 0, 0);
 
-        // İleri
         float elapsed = 0;
         while (elapsed < pokeSpeed)
         {
@@ -84,7 +116,6 @@ public class EnemyUnit : BaseUnit
             yield return null;
         }
 
-        // Geri
         elapsed = 0;
         while (elapsed < pokeSpeed * 2)
         {
@@ -117,7 +148,7 @@ public class EnemyUnit : BaseUnit
                 if (dist < minDistance) { minDistance = dist; bestTarget = p; }
             }
         }
-        if (bestTarget != null) { target = bestTarget; return; } // Bulduysak fonksiyondan çık!
+        if (bestTarget != null) { target = bestTarget; return; }
 
         // GRUP 2: Avantajlı olduğum birimler
         minDistance = Mathf.Infinity;
@@ -134,7 +165,7 @@ public class EnemyUnit : BaseUnit
         }
         if (bestTarget != null) { target = bestTarget; return; }
 
-        // GRUP 3: En yakın birim (Dezavantajlılar dahil)
+        // GRUP 3: En yakın birim
         minDistance = Mathf.Infinity;
         foreach (PlayerUnit p in players)
         {
@@ -148,7 +179,6 @@ public class EnemyUnit : BaseUnit
         target = bestTarget;
     }
 
-    // Yardımcı fonksiyon: Tip avantajını kontrol eder
     bool CheckAdvantage(UnitType attacker, UnitType defender)
     {
         if (attacker == UnitType.Archer && defender == UnitType.Infantry) return true;
@@ -163,18 +193,14 @@ public class EnemyUnit : BaseUnit
         {
             if (data.type == UnitType.Archer && arrowPrefab != null)
             {
-                // --- OKÇU SALDIRISI ---
                 GameObject arrowObj = Instantiate(arrowPrefab, transform.position, Quaternion.identity);
                 arrowObj.GetComponent<Projectile>().Setup(target, data.attackDamage, data.type, currentRank);
             }
             else
             {
-                // --- PİYADE/ATLI MIZRAK EFEKTİ ---
                 if (spearTransform != null) StartCoroutine(SpearPokeRoutine());
-
                 target.TakeDamage(data.attackDamage, data.type, currentRank);
             }
-
             lastAttackTime = Time.time;
         }
     }

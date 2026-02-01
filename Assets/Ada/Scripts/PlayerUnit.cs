@@ -10,7 +10,7 @@ public class PlayerUnit : BaseUnit
 
     [Header("Combat Visuals")]
     public GameObject arrowPrefab; // Okçu için
-    public Transform spearTransform; // Piyade mızrağı için (Inspector'dan sürükle)
+    public Transform spearTransform; // Piyade mızrağı için
     public float pokeDistance = 0.6f;
     public float pokeSpeed = 0.05f;
 
@@ -19,15 +19,24 @@ public class PlayerUnit : BaseUnit
     private float lastAttackTime;
     private Vector3 spearOriginalPos;
 
+    // --- SES DEĞİŞKENİ ---
+    private AudioSource audioSource;
+
     protected override void Start()
     {
         base.Start();
         if (selectionCircle != null) selectionCircle.color = defaultColor;
 
-        // Mızrağın başlangıç yerini kaydet
         if (spearTransform != null) spearOriginalPos = spearTransform.localPosition;
-
         if (spearTransform != null) spearTransform.gameObject.SetActive(false);
+
+        // --- SES AYARLARI ---
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource != null)
+        {
+            // Robotik ses olmasın diye her askere hafif farklı ton veriyoruz
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+        }
     }
 
     public void MoveTo(Vector3 destination)
@@ -58,6 +67,9 @@ public class PlayerUnit : BaseUnit
 
     void Update()
     {
+        // --- SES KONTROLÜNÜ EN BAŞTA ÇAĞIR ---
+        HandleMovementSound();
+
         if (GameManager.Instance.CurrentState != GameState.Battle)
         {
             if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
@@ -93,6 +105,31 @@ public class PlayerUnit : BaseUnit
         }
     }
 
+    // --- YENİ EKLENEN SES FONKSİYONU ---
+    void HandleMovementSound()
+    {
+        if (audioSource == null || agent == null) return;
+
+        // Asker hareket ediyor mu? (Hızı 0.1'den büyükse)
+        if (agent.velocity.sqrMagnitude > 0.1f)
+        {
+            if (!audioSource.isPlaying)
+            {
+                // Rastgele bir yerden başlat ki hepsi senkronize adım atmasın
+                audioSource.time = Random.Range(0f, audioSource.clip.length);
+                audioSource.Play();
+            }
+        }
+        else
+        {
+            // Duruyorsa sesi kes (Pause daha doğal durur)
+            if (audioSource.isPlaying)
+            {
+                audioSource.Pause();
+            }
+        }
+    }
+
     void TryAttack()
     {
         if (Time.time >= lastAttackTime + data.attackRate)
@@ -104,12 +141,9 @@ public class PlayerUnit : BaseUnit
             }
             else
             {
-                // --- PİYADE GÖRSEL EFEKT (POKE) ---
                 if (spearTransform != null) StartCoroutine(SpearPokeRoutine());
-
                 target.TakeDamage(data.attackDamage, data.type, currentRank);
             }
-
             lastAttackTime = Time.time;
         }
     }
@@ -118,19 +152,11 @@ public class PlayerUnit : BaseUnit
     {
         if (target == null) yield break;
 
-        // 1. MIZRAĞI GÖRÜNÜR YAP
         spearTransform.gameObject.SetActive(true);
-
-        // 2. DÜŞMANA DOĞRU DÖNDÜR
-        // İki birim arasındaki yönü hesapla
         Vector3 direction = (target.transform.position - transform.position).normalized;
-        // Açıyı hesapla (Atan2 ile radyanı dereceye çeviriyoruz)
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        // Mızrağı o yöne çevir
         spearTransform.rotation = Quaternion.Euler(0, 0, angle);
 
-        // 3. SAPLAMA HAREKETİ
-        // Mızrağın "ileri" gitmesi için kendi yerel sağ (right) yönünü kullanıyoruz
         Vector3 startPos = spearOriginalPos;
         Vector3 punchPos = spearOriginalPos + new Vector3(pokeDistance, 0, 0);
 
@@ -142,7 +168,6 @@ public class PlayerUnit : BaseUnit
             yield return null;
         }
 
-        // 4. GERİ ÇEKİLME
         elapsed = 0;
         while (elapsed < pokeSpeed * 2)
         {
@@ -151,14 +176,12 @@ public class PlayerUnit : BaseUnit
             yield return null;
         }
 
-        // 5. MIZRAĞI TEKRAR GİZLE
         spearTransform.localPosition = spearOriginalPos;
         spearTransform.gameObject.SetActive(false);
     }
 
     BaseUnit FindNearestEnemy()
     {
-        // Sahnede UnitManager aracılığıyla tüm düşmanları alalım
         var enemies = UnitManager.Instance.activeEnemyUnits;
         BaseUnit nearest = null;
         float minDistance = Mathf.Infinity;
@@ -175,12 +198,7 @@ public class PlayerUnit : BaseUnit
             }
         }
 
-        // Sadece belirli bir görüş mesafesindeyse (Örn: 15 birim) saldırsın
-        // Tüm haritayı koşup gitmemesi için bu mesafe kontrolü iyidir.
         if (minDistance > 15f) return null;
-
         return nearest;
     }
-
-    
 }

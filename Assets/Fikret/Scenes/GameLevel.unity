@@ -14768,7 +14768,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5553230178912648970, guid: a45e2d1381e38214daba76e18070bdff, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14829,7 +14829,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5893598840097163745, guid: 75efd82cbe3258c40a28d3e754d74569, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14971,7 +14971,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2348181011570149791, guid: 87d94b7b0f1310145a027ae863b91063, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15044,7 +15044,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8973665239093047006, guid: 31e72352dd6ffe443be2c14defde6a4e, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15056,6 +15056,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 2030362933}
+  - {fileID: 249037244}
   - {fileID: 1899990026}
   - {fileID: 399545237}
   - {fileID: 1577975029}
@@ -15074,4 +15075,3 @@ SceneRoots:
   - {fileID: 6423220177668467592}
   - {fileID: 1094815522439113388}
   - {fileID: 6918360692496687563}
-  - {fileID: 249037244}
