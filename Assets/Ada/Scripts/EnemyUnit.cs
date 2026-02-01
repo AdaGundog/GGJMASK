@@ -6,6 +6,22 @@ public class EnemyUnit : BaseUnit
     public GameObject arrowPrefab; // Inspector'dan ok prefabını buraya sürükle!
     private float lastAttackTime;
 
+    [Header("Weapon Visuals")]
+    public Transform spearTransform; // Inspector'dan düşmanın mızrağını buraya koy
+    public float pokeDistance = 0.6f;
+    public float pokeSpeed = 0.05f;
+    private Vector3 spearOriginalPos;
+
+    protected override void Start()
+    {
+        base.Start();
+        // Mızrağı başta gizle ve yerini kaydet
+        if (spearTransform != null)
+        {
+            spearOriginalPos = spearTransform.localPosition;
+            spearTransform.gameObject.SetActive(false);
+        }
+    }
     void Update()
     {
         //  Hazırlık aşamasındaysak dur
@@ -45,56 +61,88 @@ public class EnemyUnit : BaseUnit
         }
     }
 
+    private System.Collections.IEnumerator SpearPokeRoutine()
+    {
+        if (target == null || spearTransform == null) yield break;
+
+        spearTransform.gameObject.SetActive(true);
+
+        // Düşmanın mızrağını bizim birliğimize doğru döndür
+        Vector3 direction = (target.transform.position - transform.position).normalized;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        spearTransform.rotation = Quaternion.Euler(0, 0, angle);
+
+        Vector3 startPos = spearOriginalPos;
+        Vector3 punchPos = spearOriginalPos + new Vector3(pokeDistance, 0, 0);
+
+        // İleri
+        float elapsed = 0;
+        while (elapsed < pokeSpeed)
+        {
+            spearTransform.localPosition = Vector3.Lerp(startPos, punchPos, elapsed / pokeSpeed);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // Geri
+        elapsed = 0;
+        while (elapsed < pokeSpeed * 2)
+        {
+            spearTransform.localPosition = Vector3.Lerp(punchPos, startPos, elapsed / (pokeSpeed * 2));
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        spearTransform.localPosition = spearOriginalPos;
+        spearTransform.gameObject.SetActive(false);
+    }
+
     public void FindBestTarget()
     {
         PlayerUnit[] players = FindObjectsOfType<PlayerUnit>();
+        if (players.Length == 0) { target = null; return; }
+
         BaseUnit bestTarget = null;
         float minDistance = Mathf.Infinity;
 
-        // Önce en kritik grubu bulalım (Bana saldıranlar)
-        // Eğer okçuysak bu grubu atlayıp direkt avantaj grubuna bakabiliriz (isteğe bağlı)
+        // GRUP 1: Bana yakından saldıranlar
         foreach (PlayerUnit p in players)
         {
             if (p == null || p.currentHealth <= 0) continue;
             float dist = Vector2.Distance(transform.position, p.transform.position);
             if (dist > 15f) continue;
 
-            // GRUP 1: Bana yakından saldıranlar (En yüksek öncelik)
             if (p.target == this && dist < 5f)
             {
                 if (dist < minDistance) { minDistance = dist; bestTarget = p; }
             }
         }
+        if (bestTarget != null) { target = bestTarget; return; } // Bulduysak fonksiyondan çık!
 
-        // Eğer bana saldıran yoksa GRUP 2'ye bak: Avantajlı olduğum birimler
-        if (bestTarget == null)
+        // GRUP 2: Avantajlı olduğum birimler
+        minDistance = Mathf.Infinity;
+        foreach (PlayerUnit p in players)
         {
-            minDistance = Mathf.Infinity;
-            foreach (PlayerUnit p in players)
+            if (p == null || p.currentHealth <= 0) continue;
+            float dist = Vector2.Distance(transform.position, p.transform.position);
+            if (dist > 15f) continue;
+
+            if (CheckAdvantage(data.type, p.data.type))
             {
-                if (p == null || p.currentHealth <= 0) continue;
-                float dist = Vector2.Distance(transform.position, p.transform.position);
-                if (dist > 15f) continue;
-
-                if (CheckAdvantage(data.type, p.data.type))
-                {
-                    if (dist < minDistance) { minDistance = dist; bestTarget = p; }
-                }
-            }
-        }
-
-        // O da yoksa GRUP 3: Geri kalan her şey (Dezavantajlı dahil en yakın birim)
-        if (bestTarget == null)
-        {
-            minDistance = Mathf.Infinity;
-            foreach (PlayerUnit p in players)
-            {
-                if (p == null || p.currentHealth <= 0) continue;
-                float dist = Vector2.Distance(transform.position, p.transform.position);
-                if (dist > 15f) continue;
-
                 if (dist < minDistance) { minDistance = dist; bestTarget = p; }
             }
+        }
+        if (bestTarget != null) { target = bestTarget; return; }
+
+        // GRUP 3: En yakın birim (Dezavantajlılar dahil)
+        minDistance = Mathf.Infinity;
+        foreach (PlayerUnit p in players)
+        {
+            if (p == null || p.currentHealth <= 0) continue;
+            float dist = Vector2.Distance(transform.position, p.transform.position);
+            if (dist > 15f) continue;
+
+            if (dist < minDistance) { minDistance = dist; bestTarget = p; }
         }
 
         target = bestTarget;
@@ -113,19 +161,17 @@ public class EnemyUnit : BaseUnit
     {
         if (Time.time >= lastAttackTime + data.attackRate)
         {
-            // Eğer düşman verisinde tipi okçu olarak ayarlandıysa
             if (data.type == UnitType.Archer && arrowPrefab != null)
             {
-                // Oku yarat
+                // --- OKÇU SALDIRISI ---
                 GameObject arrowObj = Instantiate(arrowPrefab, transform.position, Quaternion.identity);
-
-                // Oku hedefe (oyuncuya) odakla
                 arrowObj.GetComponent<Projectile>().Setup(target, data.attackDamage, data.type, currentRank);
-                Debug.Log(gameObject.name + " ok fırlattı!");
             }
             else
             {
-                // Yakın dövüşçü ise doğrudan hasar ver
+                // --- PİYADE/ATLI MIZRAK EFEKTİ ---
+                if (spearTransform != null) StartCoroutine(SpearPokeRoutine());
+
                 target.TakeDamage(data.attackDamage, data.type, currentRank);
             }
 
