@@ -10,6 +10,10 @@ public abstract class BaseUnit : MonoBehaviour
     [SerializeField] private GameObject healthBarGroup;
     public UnityEngine.UI.Image healthBarFill; // Inspector'dan yeþil resmi buraya sürükle
 
+    [Header("Feedback Settings")]
+    public float tiltAmount = 15f; // Ne kadar yana yatacak?
+    public float tiltDuration = 0.1f;
+
     [Header("Combat State")]
     public BaseUnit target;
 
@@ -61,6 +65,8 @@ public abstract class BaseUnit : MonoBehaviour
     public void TakeDamage(float amount, UnitType attackerType, int attackerRank)
     {
         float finalDamage = amount;
+
+        PlayHitFeedback();
 
         // 1. SALDIRGAN RÜTBE BONUSU (Saldýrganýn rütbesine göre vurduðu hasar artar)
         // Senin Inspector'dan belirlediðin 'damageMultiplierPerRank' deðerini kullanýr.
@@ -163,6 +169,27 @@ public abstract class BaseUnit : MonoBehaviour
             agent.speed = data.moveSpeed;
         }
     }
+
+    public void PlayHitFeedback()
+    {
+        // Coroutine ile hýzlýca saða/sola yatýp düzelmesini saðlayalým
+        StartCoroutine(HitTiltRoutine());
+    }
+
+    private System.Collections.IEnumerator HitTiltRoutine()
+    {
+        Quaternion originalRotation = transform.rotation;
+
+        // Rastgele bir yöne (saða veya sola) hafifçe yatýr
+        float randomTilt = Random.Range(0, 2) == 0 ? tiltAmount : -tiltAmount;
+        transform.rotation = Quaternion.Euler(0, 0, randomTilt);
+
+        yield return new WaitForSeconds(tiltDuration);
+
+        // Eski haline geri döndür
+        transform.rotation = originalRotation;
+    }
+
     protected virtual void Die()
     {
         // SelectionManager listesinden kendini temizlemesi için bir event veya doðrudan eriþim
