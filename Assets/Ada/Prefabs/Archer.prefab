@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6044102124535409931
 RectTransform:
   m_ObjectHideFlags: 0
@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.02195, y: -0.0000000074506}
+  m_AnchoredPosition: {x: 0.02195, y: 0}
   m_SizeDelta: {x: 0.8983, y: 0.0489}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2049572808250037350
@@ -189,6 +189,7 @@ MonoBehaviour:
   healthBarFill: {fileID: 9009848744457578157}
   tiltAmount: 15
   tiltDuration: 0.1
+  bloodPrefab: {fileID: 8104314403498630968, guid: 8cd39969cf78f3c4388f7e2582dc23a4, type: 3}
   target: {fileID: 0}
   zoneDamageModifier: 0
   legendaryAura: {fileID: 7595883186662701603}

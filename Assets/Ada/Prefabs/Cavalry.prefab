@@ -523,6 +523,7 @@ MonoBehaviour:
   healthBarFill: {fileID: 459177881478184707}
   tiltAmount: 15
   tiltDuration: 0.1
+  bloodPrefab: {fileID: 8104314403498630968, guid: 8cd39969cf78f3c4388f7e2582dc23a4, type: 3}
   target: {fileID: 0}
   zoneDamageModifier: 0
   legendaryAura: {fileID: 4384578635773587859}
@@ -922,7 +923,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &9087299581098051247
 RectTransform:
   m_ObjectHideFlags: 0

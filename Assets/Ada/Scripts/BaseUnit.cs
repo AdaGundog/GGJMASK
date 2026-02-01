@@ -13,6 +13,9 @@ public abstract class BaseUnit : MonoBehaviour
     [Header("Feedback Settings")]
     public float tiltAmount = 15f; // Ne kadar yana yatacak?
     public float tiltDuration = 0.1f;
+    [Header("VFX")]
+    public GameObject bloodPrefab;
+
 
     [Header("Combat State")]
     public BaseUnit target;
@@ -104,6 +107,12 @@ public abstract class BaseUnit : MonoBehaviour
         if (currentHealth > 0 && this is EnemyUnit && target == null)
         {
             ((EnemyUnit)this).FindBestTarget();
+        }
+
+        if (bloodPrefab != null)
+        {
+            // Kaný birimin tam göðüs hizasýnda veya merkezinde oluþtur
+            Instantiate(bloodPrefab, transform.position, Quaternion.identity);
         }
 
         // 5. UI GÜNCELLEME
@@ -241,9 +250,10 @@ public abstract class BaseUnit : MonoBehaviour
 
     private System.Collections.IEnumerator HitTiltRoutine()
     {
-        Quaternion originalRotation = transform.rotation;
+        // Orijinal rotasyonu sakla (Genellikle Quaternion.identity yani 0,0,0 dýr)
+        Quaternion originalRotation = Quaternion.identity;
 
-        // Rastgele bir yöne (saða veya sola) hafifçe yatýr
+        // Rastgele bir yöne yatýr
         float randomTilt = Random.Range(0, 2) == 0 ? tiltAmount : -tiltAmount;
         transform.rotation = Quaternion.Euler(0, 0, randomTilt);
 
@@ -256,18 +266,23 @@ public abstract class BaseUnit : MonoBehaviour
     {
         if (healthBarGroup != null && healthBarFill != null)
         {
-            // Barý görünür yap (Caný dolarken de barý görelim)
-            healthBarGroup.SetActive(true);
-
-            // Rütbe bonusuyla artan caný doðru orantýlamak için toplam caný hesaplýyoruz
             float totalMaxHP = data.maxHealth + ((currentRank - 1) * hpBonusPerRank);
-
-            // Doluluk oranýný ayarla
             healthBarFill.fillAmount = currentHealth / totalMaxHP;
 
-            // Barýn 3 saniye sonra otomatik gizlenmesi için (opsiyonel)
-            CancelInvoke("HideHealthBar");
-            Invoke("HideHealthBar", 3f);
+            // EÐER CAN %100'DEN AZSA BARI GÖSTER
+            if (currentHealth < totalMaxHP && currentHealth > 0)
+            {
+                healthBarGroup.SetActive(true);
+
+                // Opsiyonel: Eðer yine de belli bir süre sonra kapansýn istersen 
+                // ama her iyileþmede süreyi sýfýrla:
+               
+            }
+            else if (currentHealth >= totalMaxHP)
+            {
+                // Can tamamen dolduysa barý gizle
+                Invoke("HideHealthBar", 1f);
+            }
         }
     }
 
