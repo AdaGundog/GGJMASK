@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using LevelEditor; // LevelData ve EnemyData'ya eriþmek için
+using LevelEditor;
 
 public class LevelLoader : MonoBehaviour
 {
-    // public string levelFileNameToLoad = "Level_1"; <-- BU ARTIK YOK (Otomatik)
-
     [Header("Game Prefabs (Real Units)")]
     public GameObject realInfantryPrefab;
     public GameObject realArcherPrefab;
@@ -22,9 +20,12 @@ public class LevelLoader : MonoBehaviour
 
     private void LoadLevelAndSpawn()
     {
-        string currentFileName = "Level_" + GameManager.Instance.currentLevelIndex;
-        string savePath = Path.Combine(Application.dataPath, "Fikret/Levels");
-        string fullPath = Path.Combine(savePath, currentFileName + ".json");
+        string currentFileName = "Level_" + GameManager.Instance.currentLevelIndex + ".json";
+
+        // --- DEÐÝÞÝKLÝK BURADA ---
+        // Artýk StreamingAssets/Levels klasörüne bakýyor
+        string fullPath = Path.Combine(Application.streamingAssetsPath, "Levels", currentFileName);
+        // -------------------------
 
         if (!File.Exists(fullPath))
         {
@@ -36,15 +37,12 @@ public class LevelLoader : MonoBehaviour
         string json = File.ReadAllText(fullPath);
         LevelData data = JsonUtility.FromJson<LevelData>(json);
 
-        // --- YENÝ EKLENEN KISIM: PARAYI OYUNCUYA VER ---
+        // Parayý Oyuncuya Ver
         if (GameManager.Instance != null)
         {
-            // Editörde 'levelStartBonus' olarak kaydettiðimiz deðeri GameManager'a gönderiyoruz
             GameManager.Instance.AddMoney(data.levelStartBonus);
-
             Debug.Log($"[LevelLoader] {currentFileName} yüklendi. Bonus Para: {data.levelStartBonus}");
         }
-        // ----------------------------------------------
 
         // Askerleri Doður (Spawn)
         foreach (var enemyData in data.enemies)
@@ -71,16 +69,13 @@ public class LevelLoader : MonoBehaviour
 
             unit.name = $"Enemy_{data.type}";
 
-            // --- YENÝ EKLENEN KISIM: KÝMLÝK ZORLAMASI ---
-            // Yaratýlan objenin üzerindeki kimlik kartýný bul
+            // Kimlik Zorlamasý
             UnitRegistration reg = unit.GetComponent<UnitRegistration>();
             if (reg != null)
             {
-                // "Sen oyuncu deðilsin, sen düþmansýn!" de.
                 reg.isPlayerUnit = false;
                 reg.unitType = (UnitType)data.type;
             }
-            // ---------------------------------------------
         }
     }
 }

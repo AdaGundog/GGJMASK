@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 #if UNITY_EDITOR
-using UnityEditor; // Editor kütüphanesini bu þekilde korumaya alýyoruz
+using UnityEditor;
 #endif
 
 namespace LevelEditor
@@ -11,7 +11,6 @@ namespace LevelEditor
     {
         [Header("Editor Tools")]
         public bool isEditMode = false;
-
         public EnemyType currentSelection = EnemyType.Infantry;
 
         [Header("Level Settings")]
@@ -28,7 +27,6 @@ namespace LevelEditor
         [HideInInspector]
         public LevelData currentLevelData = new LevelData();
 
-        // --- EDÝTÖRÜN ÇAÐIRACAÐI FONKSÝYON ---
         public void AddEnemyFromEditor(Vector3 position)
         {
 #if UNITY_EDITOR
@@ -44,7 +42,6 @@ namespace LevelEditor
 
             if (prefabToUse == null) return;
 
-            // Build'de hata veren kýsýmlarý #if UNITY_EDITOR ile sarýyoruz
             GameObject newEnemy = (GameObject)PrefabUtility.InstantiatePrefab(prefabToUse);
             newEnemy.transform.position = position;
             newEnemy.transform.parent = enemiesParent;
@@ -59,12 +56,18 @@ namespace LevelEditor
 #endif
         }
 
+        // --- DEÐÝÞÝKLÝK BURADA ---
         private string GetSavePath()
         {
-            string path = Path.Combine(Application.dataPath, "Fikret/Levels");
+            // Kayýt yolunu StreamingAssets/Levels yaptýk
+            string path = Path.Combine(Application.streamingAssetsPath, "Levels");
+
+            // Eðer klasör yoksa oluþtur (Editörde ilk seferde lazým olabilir)
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
             return path;
         }
+        // -------------------------
 
         public void SaveLevel()
         {
@@ -100,10 +103,9 @@ namespace LevelEditor
 
         public void LoadLevel()
         {
+            // Yolu GetSavePath() üzerinden alýyor, yani StreamingAssets'ten okuyacak
             string fullPath = Path.Combine(GetSavePath(), levelFileName + ".json");
 
-            // Build'de Application.dataPath farklý çalýþabilir, alternatif olarak PersistentDataPath veya Resources klasörü gerekebilir.
-            // Þimdilik dosya yolunu kontrol ediyoruz:
             if (File.Exists(fullPath))
             {
                 // 1. Sahneyi temizle
@@ -111,7 +113,6 @@ namespace LevelEditor
                 {
                     for (int i = enemiesParent.childCount - 1; i >= 0; i--)
                     {
-                        // Build'de Destroy, Editor'de DestroyImmediate kullanýlýr
                         if (Application.isPlaying)
                             Destroy(enemiesParent.GetChild(i).gameObject);
                         else
@@ -134,34 +135,30 @@ namespace LevelEditor
                     if (prefab != null)
                     {
                         GameObject newEnemy;
-
 #if UNITY_EDITOR
                         if (!Application.isPlaying)
-                        {
-                            // Editör'de çizim yaparken prefab baðlantýsýný koru
                             newEnemy = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(prefab);
-                        }
                         else
-                        {
                             newEnemy = Instantiate(prefab);
-                        }
 #else
-                // OYUN ÝÇÝNDE (BUILD'DE) BU ÇALIÞIR:
-                newEnemy = Instantiate(prefab);
+                        newEnemy = Instantiate(prefab);
 #endif
-
                         newEnemy.transform.position = enemyData.position;
                         newEnemy.transform.parent = enemiesParent;
                     }
                 }
-                Debug.Log("Bölüm baþarýyla yüklendi!");
+                Debug.Log("Bölüm StreamingAssets üzerinden yüklendi!");
+            }
+            else
+            {
+                Debug.LogError($"Bölüm dosyasý bulunamadý: {fullPath}");
             }
         }
 
         private void OnDrawGizmos()
         {
             if (!isEditMode) return;
-
+            // Gizmos kodlarýn ayný kalabilir...
             Gizmos.color = new Color(0.5f, 0.5f, 0.5f, 0.3f);
             for (int x = -15; x <= 15; x++) Gizmos.DrawLine(new Vector3(x, -10, 0), new Vector3(x, 10, 0));
             for (int y = -10; y <= 10; y++) Gizmos.DrawLine(new Vector3(-15, y, 0), new Vector3(15, y, 0));
