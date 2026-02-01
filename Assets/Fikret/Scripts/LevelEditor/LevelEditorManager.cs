@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace LevelEditor
 {
+
+
     public class LevelEditorManager : MonoBehaviour
     {
         [Header("Editor Tools")]
@@ -15,6 +17,7 @@ namespace LevelEditor
         [Header("Level Settings")]
         public string levelFileName = "Level_1";
         public float initialInk = 100f;
+        public int levelBonus;
 
         [Header("References")]
         public GameObject archerPrefab;
@@ -103,6 +106,7 @@ namespace LevelEditor
             // 4. Diðer verileri güncelle
             currentLevelData.levelName = levelFileName;
             currentLevelData.startingInkAmount = initialInk;
+            currentLevelData.levelStartBonus = levelBonus;
 
             // 5. Kaydet
             string json = JsonUtility.ToJson(currentLevelData, true);

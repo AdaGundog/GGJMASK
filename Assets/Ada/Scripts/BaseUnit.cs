@@ -17,8 +17,10 @@ public abstract class BaseUnit : MonoBehaviour
     [Header("Combat State")]
     public BaseUnit target;
 
+    [Header("Rank 4 Specials")]
+    public TMPro.TextMeshProUGUI nameText;
     [Header("Rank System")]
-    [Range(1, 3)]
+    [Range(1, 4)]
     public int currentRank = 1; // 1: Er, 2: Çavuþ, 3: Seçkin
     public UnityEngine.UI.Image rankIconImage; // Baþýndaki rütbe simgesi
 
@@ -26,7 +28,7 @@ public abstract class BaseUnit : MonoBehaviour
     public Sprite rank1Sprite; // Boþ veya basit bir simge
     public Sprite rank2Sprite; // Ýki þeritli simge
     public Sprite rank3Sprite; // Üç þeritli/Yýldýzlý simge
-
+    public Sprite rank4Sprite;
     [Header("Unit Info")]
     public string unitFullName;
 
@@ -134,15 +136,29 @@ public abstract class BaseUnit : MonoBehaviour
 
     public void UpdateRankVisuals()
     {
-        // Eðer resim atanmamýþsa hata vermemesi için kontrol
         if (rankIconImage == null) return;
 
-        // Rütbeye göre Sprite (resim) deðiþtir
         if (currentRank == 1) rankIconImage.sprite = rank1Sprite;
         else if (currentRank == 2) rankIconImage.sprite = rank2Sprite;
         else if (currentRank == 3) rankIconImage.sprite = rank3Sprite;
+        if (currentRank == 4)
+        {
+            rankIconImage.sprite = rank4Sprite;
 
-        // Rank 1 ise simgeyi gizleyebiliriz (isteðe baðlý)
+            // --- ÝSÝM GÖSTERME MANTIÐI ---
+            if (nameText != null)
+            {
+                nameText.text = unitFullName; // Birimin adýný yazdýr
+                nameText.gameObject.SetActive(true); // Ýsmi görünür yap
+                
+            }
+        }
+        else
+        {
+            // Rütbe 4 deðilse ismi gizle
+            if (nameText != null) nameText.gameObject.SetActive(false);
+        }
+
         rankIconImage.gameObject.SetActive(currentRank > 1);
 
         float extraHP = (currentRank - 1) * hpBonusPerRank;
