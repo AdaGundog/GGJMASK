@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using LevelEditor; // EnemyType için
 using UnityEngine.SceneManagement; // Sahne yenilemek için şart
 
-
 public enum GameState
 {
     Preparation, // Asker yerleştirme
@@ -13,20 +12,16 @@ public enum GameState
     Defeat       // Kaybettik
 }
 
-[System.Serializable]
+[Serializable]
 public class VeteranData
 {
-    public UnitType type; // EnemyType yerine UnitType yapıldı
+    public EnemyType type;
     public int rank;
-    public string unitName;
-    public float savedHealth;
 
-    public VeteranData(UnitType t, int r, string name, float hp)
+    public VeteranData(EnemyType t, int r)
     {
         type = t;
         rank = r;
-        unitName = name;
-        savedHealth = hp;
     }
 }
 
@@ -34,7 +29,6 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public GameState CurrentState { get; private set; }
-
     // --- YENİ: LEVEL SAYACI ---
     public int currentLevelIndex = 1;
 
@@ -44,7 +38,7 @@ public class GameManager : MonoBehaviour
     public event Action OnDefeat;
 
     [Header("Economy")]
-    public int startingMoney = 500;
+    public int startingMoney = 1000;
     public int CurrentMoney { get; private set; }
 
     // Gaziler Listesi
@@ -117,26 +111,14 @@ public class GameManager : MonoBehaviour
         veterans.Clear();
         foreach (GameObject unit in survivors)
         {
-            BaseUnit bUnit = unit.GetComponent<BaseUnit>();
+            BaseUnit baseUnit = unit.GetComponent<BaseUnit>(); // Senin scriptin
             UnitRegistration reg = unit.GetComponent<UnitRegistration>();
 
-            if (bUnit != null && reg != null)
+            if (baseUnit != null && reg != null)
             {
-                // 1. ADIM: Birimin kendi içindeki rütbesini fiziksel olarak artır (Max 3)
-                bUnit.currentRank = Mathf.Min(bUnit.currentRank + 1, 3);
-
-                // 2. ADIM: Birimin görselini (Rank ikonunu) ve varsa Emission (parlama) değerini güncelle
-                bUnit.UpdateRankVisuals();
-
-                // 3. ADIM: Şimdi bu güncellenmiş (artırılmış) rütbeyi VeteranData olarak kaydet
-                veterans.Add(new VeteranData(
-                    bUnit.data.type,
-                    bUnit.currentRank,
-                    bUnit.unitFullName,
-                    bUnit.currentHealth
-                ));
-
-                Debug.Log($"{bUnit.unitFullName} terfi etti! Yeni Rank: {bUnit.currentRank}");
+                // Hem tipi hem de senin rütbe verini kaydediyoruz
+                // UnitType'ı EnemyType'a cast ediyoruz (aynı değerlere sahipler)
+                veterans.Add(new VeteranData((EnemyType)reg.unitType, baseUnit.currentRank));
             }
         }
     }

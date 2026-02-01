@@ -91,7 +91,7 @@ GameObject:
   - component: {fileID: 7239870034517105044}
   m_Layer: 7
   m_Name: Archer
-  m_TagString: Player
+  m_TagString: PlayerUnit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -156,7 +156,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 99
   m_Sprite: {fileID: 21300000, guid: 6ed3f02f4270307499c32858a43d333b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -191,10 +191,10 @@ MonoBehaviour:
   rank2Sprite: {fileID: 21300000, guid: 552609d7b6a3fa04c8dd21c371499765, type: 3}
   rank3Sprite: {fileID: 21300000, guid: 79a985b7e9ffdb144b5b314a94366403, type: 3}
   unitFullName: 
-  hpBonusPerRank: 4
+  hpBonusPerRank: 20
   damageMultiplierPerRank: 0.2
   tankinessPerRank: 0.1
-  selectionCircle: {fileID: 4384531630944318834}
+  selectionCircle: {fileID: 0}
   defaultColor: {r: 0, g: 1, b: 0, a: 1}
   selectedColor: {r: 0, g: 0, b: 1, a: 1}
   isSelected: 0

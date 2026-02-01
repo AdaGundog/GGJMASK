@@ -4,7 +4,6 @@ using TMPro; // TextMeshPro kullanýyoruz (Unity'nin modern yazý sistemi)
 public class MoneyUI : MonoBehaviour
 {
     public TextMeshProUGUI moneyText; // Inspector'dan sürükle
-
     private void Start()
     {
         // Oyun açýlýnca parayý yaz
