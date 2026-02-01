@@ -312,6 +312,9 @@ MonoBehaviour:
   damageMultiplierPerRank: 0.2
   tankinessPerRank: 0.1
   arrowPrefab: {fileID: 6815061548058876008, guid: dfb3521baba36b64b9f9694aea932d53, type: 3}
+  spearTransform: {fileID: 0}
+  pokeDistance: 0.6
+  pokeSpeed: 0.05
 --- !u!195 &879547037300285061
 NavMeshAgent:
   m_ObjectHideFlags: 0

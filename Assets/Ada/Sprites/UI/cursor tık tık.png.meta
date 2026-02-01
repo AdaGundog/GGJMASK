@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 3ccb35a84934ace44b5a788f0ffc8cf4
+guid: 08250e3d48b03b746ba521447e9028b2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5004882880461042859
-    second: duvar_0
+      213: -7231961536487540422
+    second: "cursor t\u0131k t\u0131k_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -48,7 +48,7 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 1
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 64
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: duvar_0
+      name: "cursor t\u0131k t\u0131k_0"
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 480
-        height: 50
+        x: 8
+        y: 3
+        width: 47
+        height: 51
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ba47058767ae47540800000000000000
-      internalID: 5004882880461042859
+      spriteID: a393f549c49e2ab90800000000000000
+      internalID: -7231961536487540422
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      duvar_0: 5004882880461042859
+      "cursor t\u0131k t\u0131k_0": -7231961536487540422
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
