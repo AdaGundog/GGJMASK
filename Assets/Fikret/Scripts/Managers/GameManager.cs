@@ -61,6 +61,7 @@ public class GameManager : MonoBehaviour
         CurrentMoney = startingMoney;
     }
 
+
     // --- YENİ: LEVEL BİTİRME FONKSİYONU ---
     public void LevelCompleted()
     {

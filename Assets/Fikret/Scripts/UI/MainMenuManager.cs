@@ -3,18 +3,51 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuManager : MonoBehaviour
 {
+    [Header("Paneller")]
+    public GameObject mainMenuPanel; // Play, Settings, Credits, Quit butonlarýnýn olduðu ana grup
+    public GameObject settingsPanel; // Ayarlar paneli
+    public GameObject creditsPanel;  // Emeði geçenler paneli
+
+    private void Start()
+    {
+        // Sahne açýldýðýnda garanti olsun diye sadece Ana Menüyü aç, diðerlerini kapat
+        BackToMainMenu();
+    }
+
+    // --- PANEL YÖNETÝMÝ ---
+
+    public void OpenSettings()
+    {
+        mainMenuPanel.SetActive(false); // Ana menüyü gizle
+        settingsPanel.SetActive(true);  // Ayarlarý aç
+        creditsPanel.SetActive(false);
+    }
+
+    public void OpenCredits()
+    {
+        mainMenuPanel.SetActive(false); // Ana menüyü gizle
+        settingsPanel.SetActive(false);
+        creditsPanel.SetActive(true);   // Credits'i aç
+    }
+
+    // Settings ve Credits içindeki "Geri Dön" (Back) butonuna bunu baðla
+    public void BackToMainMenu()
+    {
+        settingsPanel.SetActive(false);
+        creditsPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);  // Ana menüyü tekrar göster
+    }
+
+    // --- OYUN FONKSÝYONLARI ---
+
     public void PlayGame()
     {
-        // GameManager yaþýyorsa onu sýfýrla ki Level 1'den baþlasýn
         if (GameManager.Instance != null)
         {
             GameManager.Instance.currentLevelIndex = 1;
-            // Diðer resetlemeler GameManager'ýn Start'ýnda veya Level yüklendiðinde yapýlýr
         }
 
-        // Oyun Sahnesini Yükle (Sahne adýn "GameLevel_1" ise onu yaz, deðilse Build Settings'den bak)
-        // Seninle "GameLevel1" veya benzeri bir isimde karar kýlmýþtýk.
-        // Eðer build settings'de index 1 ise direkt 1 de yazabilirsin.
+        // Build Settings'deki sýraya göre 1. sahneyi yükler
         SceneManager.LoadScene(1);
     }
 
