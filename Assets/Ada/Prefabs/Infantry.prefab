@@ -122,10 +122,10 @@ MonoBehaviour:
   hpBonusPerRank: 20
   damageMultiplierPerRank: 0.2
   tankinessPerRank: 0.1
-  selectionCircle: {fileID: 0}
+  selectionCircle: {fileID: 1803523355024754457}
   defaultColor: {r: 0, g: 1, b: 0, a: 1}
   selectedColor: {r: 0, g: 0, b: 1, a: 1}
-  arrowPrefab: {fileID: 0}
+  arrowPrefab: {fileID: 1025088795986660623}
   spearTransform: {fileID: 7049093156429584113}
   pokeDistance: 0.6
   pokeSpeed: 0.1

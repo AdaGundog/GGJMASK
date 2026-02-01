@@ -296,7 +296,7 @@ MonoBehaviour:
   hpBonusPerRank: 20
   damageMultiplierPerRank: 0.2
   tankinessPerRank: 0.1
-  selectionCircle: {fileID: 0}
+  selectionCircle: {fileID: 8874644831113333282}
   defaultColor: {r: 0, g: 1, b: 0, a: 1}
   selectedColor: {r: 0, g: 0, b: 1, a: 1}
   arrowPrefab: {fileID: 0}

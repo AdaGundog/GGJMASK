@@ -111,14 +111,23 @@ public class GameManager : MonoBehaviour
         veterans.Clear();
         foreach (GameObject unit in survivors)
         {
-            BaseUnit baseUnit = unit.GetComponent<BaseUnit>(); // Senin scriptin
+            BaseUnit baseUnit = unit.GetComponent<BaseUnit>();
             UnitRegistration reg = unit.GetComponent<UnitRegistration>();
 
             if (baseUnit != null && reg != null)
             {
-                // Hem tipi hem de senin rütbe verini kaydediyoruz
-                // UnitType'ı EnemyType'a cast ediyoruz (aynı değerlere sahipler)
+                // --- RÜTBE ATLATMA BURADA GERÇEKLEŞİYOR ---
+                if (baseUnit.currentRank < 3)
+                {
+                    baseUnit.currentRank++;
+                    // Not: Görseli burada UpdateRankVisuals ile güncellemeye gerek yok 
+                    // çünkü sahne hemen sonra kapanacak. Önemli olan veriyi (rank) artırmak.
+                }
+
+                // Artmış olan yeni rütbeyi "VeteranData" olarak kaydediyoruz
                 veterans.Add(new VeteranData((EnemyType)reg.unitType, baseUnit.currentRank));
+
+                Debug.Log($"{unit.name} gazi olarak kaydedildi. Yeni Rütbe: {baseUnit.currentRank}");
             }
         }
     }
