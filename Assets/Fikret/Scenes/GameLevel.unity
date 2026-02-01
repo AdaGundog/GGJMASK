@@ -13528,7 +13528,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentLevelIndex: 1
-  startingMoney: 1000
+  startingMoney: 100000
   veterans: []
 --- !u!1 &1584337667
 GameObject:
