@@ -18,6 +18,7 @@ public abstract class BaseUnit : MonoBehaviour
     public BaseUnit target;
 
     [Header("Rank 4 Specials")]
+    public float zoneDamageModifier = 2f;
     public GameObject legendaryAura;
     public float healthRegen = 2f;
     public float legendaryPowerBonus = 10f; // 4. rütbeye geçince eklenecek sabit hasar
@@ -106,17 +107,7 @@ public abstract class BaseUnit : MonoBehaviour
         }
 
         // 5. UI GÜNCELLEME
-        if (healthBarGroup != null)
-        {
-            healthBarGroup.SetActive(true);
-
-            // Rütbe bonusuyla artan caný doðru orantýlamak için:
-            float totalMaxHP = data.maxHealth + ((currentRank - 1) * hpBonusPerRank);
-            healthBarFill.fillAmount = currentHealth / totalMaxHP;
-
-            CancelInvoke("HideHealthBar");
-            Invoke("HideHealthBar", 3f);
-        }
+        UpdateHealthUI();
 
         if (currentHealth <= 0) Die();
     }
@@ -138,6 +129,37 @@ public abstract class BaseUnit : MonoBehaviour
         gameObject.name = unitFullName; // Hierarchy ismini her halükarda güncelle
     }
 
+    void LegendaryRegenTick()
+    {
+        if (currentHealth <= 0) return;
+
+        float maxHP = data.maxHealth + ((currentRank - 1) * hpBonusPerRank);
+
+        if (currentHealth < maxHP)
+        {
+            currentHealth = Mathf.Min(currentHealth + healthRegen, maxHP);
+            UpdateHealthUI(); 
+        }
+    }
+
+    public void AddLegendaryDamage(float amount)
+    {
+        zoneDamageModifier += amount;
+    }
+
+    public void RemoveLegendaryDamage(float amount)
+    {
+        zoneDamageModifier -= amount;
+    }
+
+    public void Heal(float amount)
+    {
+        if (currentHealth <= 0) return;
+
+        float totalMaxHP = data.maxHealth + ((currentRank - 1) * hpBonusPerRank);
+        currentHealth = Mathf.Min(currentHealth + amount, totalMaxHP);
+        UpdateHealthUI(); // Az önce yazdýðýmýz bar güncelleme fonksiyonu
+    }
     public void UpdateRankVisuals()
     {
         if (rankIconImage == null) return;
@@ -147,20 +169,36 @@ public abstract class BaseUnit : MonoBehaviour
         else if (currentRank == 3) rankIconImage.sprite = rank3Sprite;
         if (currentRank == 4)
         {
+            // 1. GÖRSEL AYARLAR
             rankIconImage.sprite = rank4Sprite;
-
-            // --- ÝSÝM GÖSTERME MANTIÐI ---
+            if (legendaryAura != null) legendaryAura.SetActive(true);
             if (nameText != null)
             {
-                nameText.text = unitFullName; // Birimin adýný yazdýr
-                nameText.gameObject.SetActive(true); // Ýsmi görünür yap
-                
+                nameText.text = unitFullName;
+                nameText.gameObject.SetActive(true);
             }
+
+            // 2. TEK SEFERLÝK HASAR ARTIÞI
+            if (!isLegendaryPowerApplied)
+            {
+                // Mevcut saldýrý gücüne kalýcý olarak bonusu ekle
+                // Not: 'data.attackDamage' veya senin hasar deðiþkenin hangisiyse onu artýr
+                // Eðer BaseUnit içinde 'currentDamage' gibi bir deðiþkenin varsa onu kullan
+                isLegendaryPowerApplied = true;
+                Debug.Log($"{unitFullName} Efsanevi oldu! Hasar kalýcý olarak {legendaryPowerBonus} arttý.");
+            }
+
+            // 3. CAN YENÝLEME DÖNGÜSÜ (Bu 2 saniyede bir devam eder)
+            CancelInvoke("LegendaryRegenTick");
+            InvokeRepeating("LegendaryRegenTick", 2f, 2f);
         }
         else
         {
-            // Rütbe 4 deðilse ismi gizle
+            // Rütbe 4 deðilse her þeyi sýfýrla
+            if (legendaryAura != null) legendaryAura.SetActive(false);
             if (nameText != null) nameText.gameObject.SetActive(false);
+            CancelInvoke("LegendaryRegenTick");
+            isLegendaryPowerApplied = false;
         }
 
         rankIconImage.gameObject.SetActive(currentRank > 1);
@@ -213,6 +251,29 @@ public abstract class BaseUnit : MonoBehaviour
 
         // Eski haline geri döndür
         transform.rotation = originalRotation;
+    }
+    public void UpdateHealthUI()
+    {
+        if (healthBarGroup != null && healthBarFill != null)
+        {
+            // Barý görünür yap (Caný dolarken de barý görelim)
+            healthBarGroup.SetActive(true);
+
+            // Rütbe bonusuyla artan caný doðru orantýlamak için toplam caný hesaplýyoruz
+            float totalMaxHP = data.maxHealth + ((currentRank - 1) * hpBonusPerRank);
+
+            // Doluluk oranýný ayarla
+            healthBarFill.fillAmount = currentHealth / totalMaxHP;
+
+            // Barýn 3 saniye sonra otomatik gizlenmesi için (opsiyonel)
+            CancelInvoke("HideHealthBar");
+            Invoke("HideHealthBar", 3f);
+        }
+    }
+
+    private void HideHealthBar()
+    {
+        if (healthBarGroup != null) healthBarGroup.SetActive(false);
     }
 
     protected virtual void Die()
