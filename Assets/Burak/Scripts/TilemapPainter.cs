@@ -1,28 +1,33 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.AI;
+using NavMeshPlus.Components;
 using System.Collections.Generic;
 public class TilemapPainter : MonoBehaviour
 {
     [Header("Game Mananeger")]
     public GameManager gameManager;
 
-    [Header("Tilemap Ayarlarý")]
+    [Header("Tilemap Ayarlari")]
     public Tilemap obstacleTilemap;
     public TileBase wallTile;
     public Camera mainCamera;
 
-    [Header("Mürekkep Ayarlarý")]
-    public int inkAmount;
+    [Header("NavMesh Ayarlari")]
+    public NavMeshSurface navMeshSurface; // NavMesh'i guncellemek icin
+
+    [Header("Murekkep Ayarlari")]
+    // Artik kendi ink'i yok, GameManager'dan aliyor
     public int costPerTile = 1;
 
-    [Header("Fýrça Ayarlarý")]
+    [Header("Firca Ayarlari")]
     public int brushRadius = 2;
 
-    [Header("Ýmleç Ayarlarý")]
+    [Header("Imlec Ayarlari")]
     public Texture2D brushCursor;
     public Vector2 cursorHotspot = Vector2.zero;
 
-    [Header("Yaþam Süresi Ayarlarý")]
+    [Header("Yasam Suresi Ayarlari")]
     public float tileLifetime = 30f; 
     public float fadeDuration = 5f;  
 
@@ -39,15 +44,32 @@ public class TilemapPainter : MonoBehaviour
     void Start()
     {
         if (mainCamera == null) mainCamera = Camera.main;
-        if (gameManager != null) inkAmount = gameManager.startingMoney;
+        // Artik inkAmount'u GameManager'dan aliyoruz, burada set etmiyoruz
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.B)) TogglePaintMode();
-
-        if (isPaintingMode && Input.GetMouseButton(0) && inkAmount > 0)
+        if (Input.GetKeyDown(KeyCode.B))
         {
+            TogglePaintMode();
+            Debug.Log($"[TilemapPainter] Paint Mode: {isPaintingMode}");
+        }
+
+        // GameManager'dan ink kontrolu
+        if (isPaintingMode && Input.GetMouseButton(0))
+        {
+            if (gameManager == null)
+            {
+                Debug.LogError("[TilemapPainter] GameManager referansi atanmamis!");
+                return;
+            }
+
+            if (gameManager.CurrentMoney <= 0)
+            {
+                Debug.LogWarning($"[TilemapPainter] Para yok! Mevcut: {gameManager.CurrentMoney}");
+                return;
+            }
+
             Paint();
         }
 
@@ -66,12 +88,30 @@ public class TilemapPainter : MonoBehaviour
     {
         if (UnityEngine.EventSystems.EventSystem.current != null &&
             UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        {
+            Debug.Log("[TilemapPainter] Mouse UI uzerinde, boyama iptal edildi");
             return;
+        }
+
+        if (obstacleTilemap == null)
+        {
+            Debug.LogError("[TilemapPainter] obstacleTilemap atanmamis!");
+            return;
+        }
+
+        if (wallTile == null)
+        {
+            Debug.LogError("[TilemapPainter] wallTile atanmamis!");
+            return;
+        }
 
         Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
         Vector3Int centerCell = obstacleTilemap.WorldToCell(mouseWorldPos);
 
+        Debug.Log($"[TilemapPainter] Boyama deneniyor: Cell {centerCell}, Para: {gameManager.CurrentMoney}");
+
+        int tilesCreated = 0;
         for (int x = -brushRadius; x <= brushRadius; x++)
         {
             for (int y = -brushRadius; y <= brushRadius; y++)
@@ -80,32 +120,109 @@ public class TilemapPainter : MonoBehaviour
 
                 if (Vector3Int.Distance(centerCell, currentCell) <= brushRadius)
                 {
-                    if (obstacleTilemap.GetTile(currentCell) == null && inkAmount > 0)
+                    // GameManager'dan para kontrolu
+                    if (obstacleTilemap.GetTile(currentCell) == null && gameManager != null && gameManager.CurrentMoney >= costPerTile)
                     {
                         CreateTile(currentCell);
+                        tilesCreated++;
                     }
                 }
             }
+        }
+
+        if (tilesCreated > 0)
+        {
+            Debug.Log($"[TilemapPainter] {tilesCreated} kare olusturuldu!");
+            
+            // Tum tile'lar olustuktan SONRA NavMesh'i bir kez guncelle
+            UpdateNavMesh();
         }
     }
 
     void CreateTile(Vector3Int cellPos)
     {
-        obstacleTilemap.SetTile(cellPos, wallTile);
-
-        obstacleTilemap.SetTileFlags(cellPos, TileFlags.None);
-
-        inkAmount -= costPerTile;
-
-        activeTiles.Add(new PaintedTile
+        // GameManager'dan para kontrolu ve harcama
+        if(gameManager != null && gameManager.CurrentMoney >= costPerTile)
         {
-            position = cellPos,
-            creationTime = Time.time
-        });
+            obstacleTilemap.SetTile(cellPos, wallTile);
+            obstacleTilemap.SetTileFlags(cellPos, TileFlags.None);
+
+            // GameManager'dan parayi harca
+            gameManager.SpendMoney(costPerTile);
+
+            activeTiles.Add(new PaintedTile
+            {
+                position = cellPos,
+                creationTime = Time.time
+            });
+
+            // NavMesh guncellemeyi her tile'da degil, Paint() sonunda yapacagiz
+        }
+    }
+
+    void UpdateNavMesh()
+    {
+        if (navMeshSurface != null)
+        {
+            // NavMesh'i guncelle
+            navMeshSurface.BuildNavMesh();
+            Debug.Log("[TilemapPainter] NavMesh guncellendi!");
+            
+            // TUM DUSMANLARIN PATH'LERINI YENIDEN HESAPLAT
+            UpdateAllEnemyPaths();
+            
+            // Collider kontrolu
+            TilemapCollider2D collider = obstacleTilemap.GetComponent<TilemapCollider2D>();
+            if (collider == null)
+            {
+                Debug.LogError("[TilemapPainter] HATA: ObstacleTilemap'te TilemapCollider2D yok! Ekle!");
+            }
+            else
+            {
+                Debug.Log("[TilemapPainter] TilemapCollider2D mevcut - OK");
+            }
+        }
+        else
+        {
+            Debug.LogError("[TilemapPainter] KRITIK HATA: NavMeshSurface referansi atanmamis! Dusmanlar boyali alandan gecebilir.");
+            Debug.LogError("[TilemapPainter] Cozum: TilemapPainter objesine NavMeshSurface'i ata!");
+        }
+    }
+
+    void UpdateAllEnemyPaths()
+    {
+        // Tum dusmanlari bul
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("EnemyUnit");
+        int updatedCount = 0;
+
+        foreach (GameObject enemy in enemies)
+        {
+            UnityEngine.AI.NavMeshAgent agent = enemy.GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (agent != null && agent.isOnNavMesh)
+            {
+                // Mevcut hedefi sakla
+                Vector3 currentDestination = agent.destination;
+                
+                // Path'i sifirla ve yeniden hesaplat
+                agent.ResetPath();
+                
+                // Eger bir hedefi varsa, yeniden ayarla (NavMesh guncellendiginde yeni path hesaplanir)
+                if (currentDestination != Vector3.zero)
+                {
+                    agent.SetDestination(currentDestination);
+                }
+                
+                updatedCount++;
+            }
+        }
+
+        Debug.Log($"[TilemapPainter] {updatedCount} dusmanin path'i guncellendi!");
     }
 
     void UpdateTilesLifecycle()
     {
+        bool needsNavMeshUpdate = false;
+
         for (int i = activeTiles.Count - 1; i >= 0; i--)
         {
             PaintedTile tile = activeTiles[i];
@@ -115,6 +232,7 @@ public class TilemapPainter : MonoBehaviour
             {
                 obstacleTilemap.SetTile(tile.position, null);
                 activeTiles.RemoveAt(i);
+                needsNavMeshUpdate = true; // Tile silindi, NavMesh'i guncelle
             }
             else if (age >= (tileLifetime - fadeDuration))
             {
@@ -123,6 +241,12 @@ public class TilemapPainter : MonoBehaviour
 
                 obstacleTilemap.SetColor(tile.position, new Color(1, 1, 1, alpha));
             }
+        }
+
+        // Eger tile silindiyse NavMesh'i guncelle
+        if (needsNavMeshUpdate)
+        {
+            UpdateNavMesh();
         }
     }
 }

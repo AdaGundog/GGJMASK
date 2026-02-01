@@ -176,9 +176,10 @@ GameObject:
   - component: {fileID: 3380776413798712906}
   - component: {fileID: 4242345180965658690}
   - component: {fileID: 7732947012818461620}
+  - component: {fileID: -7021333028859325021}
   m_Layer: 6
   m_Name: 'EnemyInfantry '
-  m_TagString: Untagged
+  m_TagString: EnemyUnit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -243,7 +244,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 99
   m_Sprite: {fileID: 21300000, guid: bf1ffe03d9d22ad47ab1fba1100168ce, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -278,6 +279,9 @@ MonoBehaviour:
   rank2Sprite: {fileID: 21300000, guid: 552609d7b6a3fa04c8dd21c371499765, type: 3}
   rank3Sprite: {fileID: 21300000, guid: 79a985b7e9ffdb144b5b314a94366403, type: 3}
   unitFullName: 
+  hpBonusPerRank: 20
+  damageMultiplierPerRank: 0.2
+  tankinessPerRank: 0.1
   arrowPrefab: {fileID: 0}
 --- !u!195 &3380776413798712906
 NavMeshAgent:
@@ -351,6 +355,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isPlayerUnit: 0
   unitType: 0
+--- !u!114 &-7021333028859325021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4928925506106156901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8878727ecb2a4bc489a9db6053836604, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitType: 0
+  currentRank: 0
+  agent: {fileID: 3380776413798712906}
+  maxHealth: 120
+  currentHealth: 0
+  attackRange: 1.5
+  attackCooldown: 1
 --- !u!1 &5096837712627221939
 GameObject:
   m_ObjectHideFlags: 0

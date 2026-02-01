@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 public class EnemyCommander : MonoBehaviour
 {
+    [Header("Manager")]
+    public GameManager gameManager;
+
     [Header("Ayarlar")]
     public Transform spawnPoint; 
     public Transform myCastleTransform;   
@@ -13,7 +16,8 @@ public class EnemyCommander : MonoBehaviour
     public int currentLevel = 1; 
 
     [Header("Ekonomi")]
-    public float currentGold = 100f;
+    // Düşman AI'ın kendi gold'u (GameManager'dan bağımsız)
+    private float currentGold = 0f;
     public float incomeRate = 5f;
 
     [Header("Prefablar")]
@@ -21,18 +25,24 @@ public class EnemyCommander : MonoBehaviour
     public GameObject archerPrefab;
     public GameObject cavalryPrefab;
 
-    [Header("Maliyetler")]
-    public float infantryCost = 20f;
-    public float archerCost = 30f;
-    public float cavalryCost = 50f;
+    [Header("Maliyetler - DeploymentManager ile aynı")]
+    public float infantryCost = 50f;
+    public float archerCost = 75f;
+    public float cavalryCost = 120f;
 
     void Start()
     {
+        // Başlangıçta GameManager ile aynı miktarda gold
+        if(gameManager != null)
+        {
+            currentGold = gameManager.startingMoney;
+        }
         StartCoroutine(ThinkAndActRoutine());
     }
 
     void Update()
     {
+        // Düşman AI'ın gelir sistemi
         currentGold += incomeRate * Time.deltaTime;
     }
 
@@ -127,18 +137,20 @@ public class EnemyCommander : MonoBehaviour
             case UnitType.Cavalry: prefabToSpawn = cavalryPrefab; cost = cavalryCost; break;
         }
 
+        // Kendi gold'undan kontrol
         if (currentGold >= cost && prefabToSpawn != null)
         {
             Spawn(prefabToSpawn, cost, type);
         }
         else
         {
-            Debug.Log($"[AI Commander] Yetersiz altın! İhtiyaç: {cost}, Mevcut: {currentGold}");
+            Debug.Log($"[AI Commander] Yetersiz altın! İhtiyaç: {cost}, Mevcut: {currentGold:F0}");
         }
     }
 
     void Spawn(GameObject prefab, float cost, UnitType type)
     {
+        // Kendi gold'undan harca
         currentGold -= cost;
         
         // 2D için spawn pozisyonu (Z=0)

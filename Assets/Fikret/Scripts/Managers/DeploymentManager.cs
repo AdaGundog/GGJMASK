@@ -48,8 +48,8 @@ public class DeploymentManager : MonoBehaviour
             {
                 GameObject prefabToSpawn = null;
 
-                // HATA BURADAYDI: EnemyType yerine UnitType kullanmalısın
-                switch (vet.type)
+                // EnemyType ve UnitType aynı değerlere sahip, cast yapıyoruz
+                switch ((UnitType)vet.type)
                 {
                     case UnitType.Infantry: prefabToSpawn = infantryPrefab; break;
                     case UnitType.Archer: prefabToSpawn = archerPrefab; break;
@@ -68,14 +68,14 @@ public class DeploymentManager : MonoBehaviour
                     BaseUnit bUnit = newVet.GetComponent<BaseUnit>();
                     if (bUnit != null)
                     {
-                        bUnit.unitFullName = vet.unitName; // Eski ismini geri ver
+                        // VeteranData'da unitName yok, yeni isim oluştur
                         bUnit.currentRank = vet.rank;      // Kaydedilen rütbesini ver
 
                         // Görselleri (Rank ikonu ve Emission parlaması) güncelle
                         bUnit.UpdateRankVisuals();
 
                         // Hierarchy'de ismini düzelt
-                        newVet.name = "Veteran_" + vet.unitName;
+                        newVet.name = "Veteran_" + bUnit.unitFullName;
                     }
                 }
                 index++;

@@ -126,11 +126,11 @@ public class EnemyUnitAI : MonoBehaviour
             priority += (20f - distance) * 2f;
 
             // 2. TİP AVANTAJI (Avantajlı hedef = İyi) - %40
-            if (IsCounterTarget(pUnit.type))
+            if (IsCounterTarget(pUnit.data.type))
             {
                 priority += 40f; // Avantajlı hedefe öncelik ver
             }
-            else if (IsWeakAgainst(pUnit.type))
+            else if (IsWeakAgainst(pUnit.data.type))
             {
                 priority -= 30f; // Dezavantajlı hedeften kaç
             }
@@ -145,7 +145,7 @@ public class EnemyUnitAI : MonoBehaviour
             if (currentRank != UnitRank.Rookie)
             {
                 // Veteran ve Elite daha akıllı hedef seçer
-                if (IsCounterTarget(pUnit.type))
+                if (IsCounterTarget(pUnit.data.type))
                 {
                     priority += 10f;
                 }

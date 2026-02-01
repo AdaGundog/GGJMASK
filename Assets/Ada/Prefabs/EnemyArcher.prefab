@@ -204,9 +204,10 @@ GameObject:
   - component: {fileID: 879547037300285061}
   - component: {fileID: 486421062085024085}
   - component: {fileID: 4037283372629551895}
+  - component: {fileID: 2132962586818358409}
   m_Layer: 6
   m_Name: EnemyArcher
-  m_TagString: Untagged
+  m_TagString: EnemyUnit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -271,7 +272,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 99
   m_Sprite: {fileID: 21300000, guid: 75e1ed780ea05f64085cecfb6ffe9ef1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -306,6 +307,9 @@ MonoBehaviour:
   rank2Sprite: {fileID: 21300000, guid: 552609d7b6a3fa04c8dd21c371499765, type: 3}
   rank3Sprite: {fileID: 21300000, guid: 79a985b7e9ffdb144b5b314a94366403, type: 3}
   unitFullName: 
+  hpBonusPerRank: 20
+  damageMultiplierPerRank: 0.2
+  tankinessPerRank: 0.1
   arrowPrefab: {fileID: 3517653925162236274, guid: cb8a8300be48ed640a89443ef242a93c, type: 3}
 --- !u!195 &879547037300285061
 NavMeshAgent:
@@ -379,6 +383,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isPlayerUnit: 0
   unitType: 1
+--- !u!114 &2132962586818358409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4933282089761000114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8878727ecb2a4bc489a9db6053836604, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitType: 1
+  currentRank: 0
+  agent: {fileID: 879547037300285061}
+  maxHealth: 100
+  currentHealth: 0
+  attackRange: 6
+  attackCooldown: 1.5
 --- !u!1 &6394032342144302357
 GameObject:
   m_ObjectHideFlags: 0
