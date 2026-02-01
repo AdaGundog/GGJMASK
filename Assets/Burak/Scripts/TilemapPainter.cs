@@ -37,6 +37,7 @@ public class TilemapPainter : MonoBehaviour
     {
         public Vector3Int position;
         public float creationTime;
+        public bool lifetimeStarted; // Omur basladi mi?
     }
 
     private List<PaintedTile> activeTiles = new List<PaintedTile>();
@@ -171,7 +172,8 @@ public class TilemapPainter : MonoBehaviour
             activeTiles.Add(new PaintedTile
             {
                 position = cellPos,
-                creationTime = Time.time
+                creationTime = Time.time,
+                lifetimeStarted = false // Henuz omur baslamadi
             });
 
             // NavMesh guncellemeyi her tile'da degil, Paint() sonunda yapacagiz
@@ -260,11 +262,25 @@ public class TilemapPainter : MonoBehaviour
 
     void UpdateTilesLifecycle()
     {
+        // Savas baslamadiysa tile'larin omrunu baslatma
+        if (gameManager != null && gameManager.CurrentState != GameState.Battle)
+        {
+            return; // Preparation modundayken tile'lar sonsuza kadar kalir
+        }
+
         bool needsNavMeshUpdate = false;
 
         for (int i = activeTiles.Count - 1; i >= 0; i--)
         {
             PaintedTile tile = activeTiles[i];
+            
+            // Savas baslayinca omru baslat
+            if (!tile.lifetimeStarted)
+            {
+                tile.lifetimeStarted = true;
+                tile.creationTime = Time.time; // Omru simdi baslat
+            }
+
             float age = Time.time - tile.creationTime; 
 
             if (age >= tileLifetime)
