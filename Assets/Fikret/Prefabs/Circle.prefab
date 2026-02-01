@@ -26,7 +26,11 @@ Transform:
   m_GameObject: {fileID: 4701080802115580317}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+<<<<<<< HEAD
   m_LocalPosition: {x: 4.5697203, y: -3.6102164, z: 0}
+=======
+  m_LocalPosition: {x: 4.5994287, y: -3.5775661, z: 0}
+>>>>>>> parent of bdcf8ef (.)
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
