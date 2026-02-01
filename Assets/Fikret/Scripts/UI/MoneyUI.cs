@@ -1,25 +1,26 @@
 using UnityEngine;
-using TMPro; // TextMeshPro kullanýyoruz (Unity'nin modern yazý sistemi)
+using TMPro;
 
 public class MoneyUI : MonoBehaviour
 {
-    public TextMeshProUGUI moneyText; // Inspector'dan sürükle
+    public TextMeshProUGUI moneyText;
+
     private void Start()
     {
-        // Oyun açýlýnca parayý yaz
-        UpdateMoneyUI(GameManager.Instance.CurrentMoney);
+        // GameManager.Instance.CurrentMoney float olduðu için UI'a gönderirken int'e çeviriyoruz
+        UpdateMoneyUI((int)GameManager.Instance.CurrentMoney);
 
-        // GameManager'daki para deðiþim eventine abone ol
+        // GameManager'daki event 'int' beklediði için fonksiyonumuzun parametresi de 'int' olmalý
         GameManager.Instance.OnMoneyChanged += UpdateMoneyUI;
     }
 
     private void OnDestroy()
     {
-        // Obje yok olunca aboneliði iptal et (Hata almamak için þart)
         if (GameManager.Instance != null)
             GameManager.Instance.OnMoneyChanged -= UpdateMoneyUI;
     }
 
+    // PARAMETREYÝ TEKRAR 'int' YAPTIK (Hatanýn çözümü burasý)
     private void UpdateMoneyUI(int amount)
     {
         moneyText.text = "Gold: " + amount.ToString();

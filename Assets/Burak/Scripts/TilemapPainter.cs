@@ -18,7 +18,7 @@ public class TilemapPainter : MonoBehaviour
 
     [Header("Murekkep Ayarlari")]
     // Artik kendi ink'i yok, GameManager'dan aliyor
-    public int costPerTile = 1;
+    public float costPerTile = 0.25f;
 
     [Header("Firca Ayarlari")]
     public int brushRadius = 2;
@@ -44,7 +44,12 @@ public class TilemapPainter : MonoBehaviour
     void Start()
     {
         if (mainCamera == null) mainCamera = Camera.main;
-        // Artik inkAmount'u GameManager'dan aliyoruz, burada set etmiyoruz
+
+        // Sahne ilk açıldığında GameManager'ı bulmaya çalış
+        if (gameManager == null)
+        {
+            gameManager = Object.FindFirstObjectByType<GameManager>();
+        }
     }
 
     void Update()
@@ -52,21 +57,22 @@ public class TilemapPainter : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.B))
         {
             TogglePaintMode();
-            Debug.Log($"[TilemapPainter] Paint Mode: {isPaintingMode}");
         }
 
-        // GameManager'dan ink kontrolu
         if (isPaintingMode && Input.GetMouseButton(0))
         {
+            // --- HATA VEREN KISMI BÖYLE GÜNCELLE ---
+            // Eğer referans hala boşsa, Singleton (Instance) üzerinden son kez dene
+            if (gameManager == null) gameManager = GameManager.Instance;
+
             if (gameManager == null)
             {
-                Debug.LogError("[TilemapPainter] GameManager referansi atanmamis!");
+                // Eğer hala bulamadıysa (GameManager objesi sahnede yoksa) hata ver ama Update'i durdur
                 return;
             }
 
             if (gameManager.CurrentMoney <= 0)
             {
-                Debug.LogWarning($"[TilemapPainter] Para yok! Mevcut: {gameManager.CurrentMoney}");
                 return;
             }
 
@@ -80,8 +86,20 @@ public class TilemapPainter : MonoBehaviour
     void TogglePaintMode()
     {
         isPaintingMode = !isPaintingMode;
-        if (isPaintingMode) Cursor.SetCursor(brushCursor, cursorHotspot, CursorMode.Auto);
-        else Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+
+        if (isPaintingMode)
+        {
+            // Boyama modu imleci
+            Cursor.SetCursor(brushCursor, cursorHotspot, CursorMode.Auto);
+        }
+        else
+        {
+            // Boyama modundan çıkınca genel CursorManager'ı devreye sok
+            if (CursorManager.Instance != null)
+                CursorManager.Instance.ResetToDefault();
+            else
+                Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+        }
     }
 
     void Paint()

@@ -29,7 +29,7 @@ public class LevelData
     public string levelName; // Bölümün adý
     public float startingInkAmount; // Oyuncunun baþlangýçtaki boya miktarý
     public List<EnemySpawnData> enemies; // O bölümdeki tüm düþmanlarýn listesi
-
+    public int levelStartBonus; // <--- YENÝ: Bu bölümün vereceði ekstra para
     // Constructor listeyi boþ baþlatýr ki "Null Reference" hatasý almayalým.
     public LevelData()
     {

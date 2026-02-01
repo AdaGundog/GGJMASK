@@ -22,26 +22,29 @@ public class LevelLoader : MonoBehaviour
 
     private void LoadLevelAndSpawn()
     {
-        // --- DÝNAMÝK DOSYA ADI ---
-        // GameManager'daki sayýya göre dosya adýný oluþturuyoruz: Level_1, Level_2 vs.
         string currentFileName = "Level_" + GameManager.Instance.currentLevelIndex;
-
-        // Dosya Yolunu Bul (Senin klasör yapýna uygun: Fikret/Levels)
         string savePath = Path.Combine(Application.dataPath, "Fikret/Levels");
         string fullPath = Path.Combine(savePath, currentFileName + ".json");
 
         if (!File.Exists(fullPath))
         {
             Debug.LogError($"KRÝTÝK HATA: Bölüm dosyasý bulunamadý! Yol: {fullPath}");
-            Debug.LogWarning("Oyun bitmiþ olabilir veya henüz bu level çizilmemiþ.");
             return;
         }
 
-        // Dosyayý Oku
+        // 1. Dosyayý Oku
         string json = File.ReadAllText(fullPath);
         LevelData data = JsonUtility.FromJson<LevelData>(json);
 
-        Debug.Log($"Bölüm Yükleniyor: {currentFileName} (Mürekkep: {data.startingInkAmount})");
+        // --- YENÝ EKLENEN KISIM: PARAYI OYUNCUYA VER ---
+        if (GameManager.Instance != null)
+        {
+            // Editörde 'levelStartBonus' olarak kaydettiðimiz deðeri GameManager'a gönderiyoruz
+            GameManager.Instance.AddMoney(data.levelStartBonus);
+
+            Debug.Log($"[LevelLoader] {currentFileName} yüklendi. Bonus Para: {data.levelStartBonus}");
+        }
+        // ----------------------------------------------
 
         // Askerleri Doður (Spawn)
         foreach (var enemyData in data.enemies)

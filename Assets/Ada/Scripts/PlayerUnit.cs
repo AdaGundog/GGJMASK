@@ -1,36 +1,49 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
 
-
 public class PlayerUnit : BaseUnit
 {
-
     [Header("Selection Visuals")]
-    public SpriteRenderer selectionCircle; // Inspector'dan halkayı buraya sürükle
+    public SpriteRenderer selectionCircle;
     public Color defaultColor = Color.green;
     public Color selectedColor = Color.blue;
 
+    [Header("Combat Visuals")]
+    public GameObject arrowPrefab; // Okçu için
+    public Transform spearTransform; // Piyade mızrağı için
+    public float pokeDistance = 0.6f;
+    public float pokeSpeed = 0.05f;
+
     public bool isSelected;
-    private bool isAutoAttacking = false; // Birim şu an otomatik modda mı?
+    private bool isAutoAttacking = false;
     private float lastAttackTime;
-    public GameObject arrowPrefab; // Inspector'dan hazırladığın prefab'ı buraya sürükle
+    private Vector3 spearOriginalPos;
+
+    // --- SES DEĞİŞKENİ ---
+    private AudioSource audioSource;
 
     protected override void Start()
     {
         base.Start();
-        // İlk başta halkayı yeşil yapıyoruz
-        if (selectionCircle != null)
+        if (selectionCircle != null) selectionCircle.color = defaultColor;
+
+        if (spearTransform != null) spearOriginalPos = spearTransform.localPosition;
+        if (spearTransform != null) spearTransform.gameObject.SetActive(false);
+
+        // --- SES AYARLARI ---
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource != null)
         {
-            selectionCircle.color = defaultColor;
+            // Robotik ses olmasın diye her askere hafif farklı ton veriyoruz
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
         }
     }
+
     public void MoveTo(Vector3 destination)
     {
         if (this == null || agent == null) return;
-
         target = null;
-        isAutoAttacking = false; // Manuel hareket emri gelirse otomatiği kapat
-
+        isAutoAttacking = false;
         if (agent.isOnNavMesh)
         {
             agent.isStopped = false;
@@ -41,31 +54,28 @@ public class PlayerUnit : BaseUnit
     public void SetTarget(BaseUnit enemy)
     {
         target = enemy;
-        isAutoAttacking = true; // Bir düşmana saldır dendiği an "Otomatik Mod" açılır
+        isAutoAttacking = true;
         if (agent != null) agent.isStopped = false;
     }
 
     public void SetSelection(bool state)
     {
         isSelected = state;
-
         if (selectionCircle != null)
-        {
-            // Seçiliyse Mavi, değilse Yeşil
             selectionCircle.color = isSelected ? selectedColor : defaultColor;
-        }
     }
 
     void Update()
     {
-        // 🛑 Savaş başlamadıysa hareket etme
+        // --- SES KONTROLÜNÜ EN BAŞTA ÇAĞIR ---
+        HandleMovementSound();
+
         if (GameManager.Instance.CurrentState != GameState.Battle)
         {
             if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
             return;
         }
 
-        // 1. MANUEL HEDEF VEYA OTOMATİK HEDEF VARSA
         if (target != null && target.currentHealth > 0)
         {
             float distance = Vector2.Distance(transform.position, target.transform.position);
@@ -84,12 +94,9 @@ public class PlayerUnit : BaseUnit
                 }
             }
         }
-        // 2. HEDEF ÖLDÜYSE VE OTOMATİK MOD AÇIKSA
         else if (isAutoAttacking)
         {
             target = FindNearestEnemy();
-
-            // Eğer etrafta hiç düşman kalmadıysa otomatiği kapat ve dur
             if (target == null)
             {
                 isAutoAttacking = false;
@@ -98,9 +105,93 @@ public class PlayerUnit : BaseUnit
         }
     }
 
+    // --- YENİ EKLENEN SES FONKSİYONU ---
+    void HandleMovementSound()
+    {
+        if (audioSource == null || agent == null) return;
+
+        // Asker hareket ediyor mu? (Hızı 0.1'den büyükse)
+        if (agent.velocity.sqrMagnitude > 0.1f)
+        {
+            if (!audioSource.isPlaying)
+            {
+                // Rastgele bir yerden başlat ki hepsi senkronize adım atmasın
+                audioSource.time = Random.Range(0f, audioSource.clip.length);
+                audioSource.Play();
+            }
+        }
+        else
+        {
+            // Duruyorsa sesi kes (Pause daha doğal durur)
+            if (audioSource.isPlaying)
+            {
+                audioSource.Pause();
+            }
+        }
+    }
+
+    void TryAttack()
+    {
+        if (Time.time >= lastAttackTime + data.attackRate)
+        {
+            // 1. TOPLAM HASARI HESAPLA
+            // BaseUnit'ten gelen zoneDamageModifier'ı buraya ekliyoruz
+            float totalDamage = data.attackDamage + zoneDamageModifier;
+
+            // 2. SALDIRI TİPİNE GÖRE HASARI GÖNDER
+            if (data.type == UnitType.Archer && arrowPrefab != null)
+            {
+                GameObject arrowObj = Instantiate(arrowPrefab, transform.position, Quaternion.identity);
+                // Ok projesine toplam hasarı gönderiyoruz
+                arrowObj.GetComponent<Projectile>().Setup(target, totalDamage, data.type, currentRank);
+            }
+            else
+            {
+                // Yakın dövüş saldırısı (Görsel efekt ve hasar verme)
+                if (spearTransform != null) StartCoroutine(SpearPokeRoutine());
+
+                // Hedefe hesapladığımız totalDamage'ı iletiyoruz
+                target.TakeDamage(totalDamage, data.type, currentRank);
+            }
+
+            lastAttackTime = Time.time;
+        }
+    }
+
+    private System.Collections.IEnumerator SpearPokeRoutine()
+    {
+        if (target == null) yield break;
+
+        spearTransform.gameObject.SetActive(true);
+        Vector3 direction = (target.transform.position - transform.position).normalized;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        spearTransform.rotation = Quaternion.Euler(0, 0, angle);
+
+        Vector3 startPos = spearOriginalPos;
+        Vector3 punchPos = spearOriginalPos + new Vector3(pokeDistance, 0, 0);
+
+        float elapsed = 0;
+        while (elapsed < pokeSpeed)
+        {
+            spearTransform.localPosition = Vector3.Lerp(startPos, punchPos, elapsed / pokeSpeed);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        elapsed = 0;
+        while (elapsed < pokeSpeed * 2)
+        {
+            spearTransform.localPosition = Vector3.Lerp(punchPos, startPos, elapsed / (pokeSpeed * 2));
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        spearTransform.localPosition = spearOriginalPos;
+        spearTransform.gameObject.SetActive(false);
+    }
+
     BaseUnit FindNearestEnemy()
     {
-        // Sahnede UnitManager aracılığıyla tüm düşmanları alalım
         var enemies = UnitManager.Instance.activeEnemyUnits;
         BaseUnit nearest = null;
         float minDistance = Mathf.Infinity;
@@ -117,32 +208,7 @@ public class PlayerUnit : BaseUnit
             }
         }
 
-        // Sadece belirli bir görüş mesafesindeyse (Örn: 15 birim) saldırsın
-        // Tüm haritayı koşup gitmemesi için bu mesafe kontrolü iyidir.
         if (minDistance > 15f) return null;
-
         return nearest;
-    }
-
-    void TryAttack()
-    {
-        if (Time.time >= lastAttackTime + data.attackRate)
-        {
-            // UnitData'da bir enum veya bool ile okçu olup olmadığını kontrol et
-            if (data.type == UnitType.Archer)
-            {
-                // Oku yarat
-                GameObject arrowObj = Instantiate(arrowPrefab, transform.position, Quaternion.identity);
-                // Okun içindeki Setup fonksiyonunu çalıştır
-                arrowObj.GetComponent<Projectile>().Setup(target, data.attackDamage, data.type, currentRank);
-            }
-            else
-            {
-                // Piyadeyse eskisi gibi doğrudan hasar ver
-                target.TakeDamage(data.attackDamage, data.type, currentRank);
-            }
-
-            lastAttackTime = Time.time;
-        }
     }
 }
