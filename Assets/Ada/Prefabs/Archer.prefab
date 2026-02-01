@@ -184,6 +184,8 @@ MonoBehaviour:
   currentHealth: 0
   healthBarGroup: {fileID: 1314812544448658231}
   healthBarFill: {fileID: 9009848744457578157}
+  tiltAmount: 15
+  tiltDuration: 0.1
   target: {fileID: 0}
   currentRank: 1
   rankIconImage: {fileID: 7735177890463278175}
@@ -194,11 +196,14 @@ MonoBehaviour:
   hpBonusPerRank: 20
   damageMultiplierPerRank: 0.2
   tankinessPerRank: 0.1
-  selectionCircle: {fileID: 0}
+  selectionCircle: {fileID: 4384531630944318834}
   defaultColor: {r: 0, g: 1, b: 0, a: 1}
   selectedColor: {r: 0, g: 0, b: 1, a: 1}
-  isSelected: 0
   arrowPrefab: {fileID: 3517653925162236274, guid: cb8a8300be48ed640a89443ef242a93c, type: 3}
+  spearTransform: {fileID: 0}
+  pokeDistance: 0.6
+  pokeSpeed: 0.05
+  isSelected: 0
 --- !u!195 &8606908269315970615
 NavMeshAgent:
   m_ObjectHideFlags: 0
