@@ -4,56 +4,64 @@ using UnityEngine.SceneManagement;
 public class MainMenuManager : MonoBehaviour
 {
     [Header("Paneller")]
-    public GameObject mainMenuPanel; // Play, Settings, Credits, Quit butonlarýnýn olduðu ana grup
-    public GameObject settingsPanel; // Ayarlar paneli
-    public GameObject creditsPanel;  // Emeði geçenler paneli
+    public GameObject mainMenuPanel;
+    public GameObject settingsPanel;
+    public GameObject creditsPanel;
 
     private void Start()
     {
-        // Sahne açýldýðýnda garanti olsun diye sadece Ana Menüyü aç, diðerlerini kapat
         BackToMainMenu();
+
+        // Menü açýldýðýnda mouse imlecini görünür yap ve kilidini aç (Garanti olsun)
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
-    // --- PANEL YÖNETÝMÝ ---
+    public void PlayGame()
+    {
+        // --- KRÝTÝK NOKTA BURASI ---
+        // Eðer GameManager yaþýyorsa (ki DontDestroy olduðu için yaþýyordur),
+        // ona "Hafýzaný temizle" emrini veriyoruz.
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetGameData();
+        }
+        else
+        {
+            // Eðer oyun ilk defa açýlýyorsa ve GameManager sahnede yoksa endiþelenme,
+            // Oyun sahnesine gidince GameManager kendi Awake fonksiyonunda zaten sýfýrdan kurulacak.
+        }
+
+        // Þimdi tertemiz bir sayfayla oyuna girebiliriz
+        SceneManager.LoadScene(1);
+    }
+
+    // ... Diðer panel fonksiyonlarýn (OpenSettings, QuitGame vs.) aynen kalsýn ...
 
     public void OpenSettings()
     {
-        mainMenuPanel.SetActive(false); // Ana menüyü gizle
-        settingsPanel.SetActive(true);  // Ayarlarý aç
+        mainMenuPanel.SetActive(false);
+        settingsPanel.SetActive(true);
         creditsPanel.SetActive(false);
     }
 
     public void OpenCredits()
     {
-        mainMenuPanel.SetActive(false); // Ana menüyü gizle
+        mainMenuPanel.SetActive(false);
         settingsPanel.SetActive(false);
-        creditsPanel.SetActive(true);   // Credits'i aç
-    }
-
-    // Settings ve Credits içindeki "Geri Dön" (Back) butonuna bunu baðla
-    public void BackToMainMenu()
-    {
-        settingsPanel.SetActive(false);
-        creditsPanel.SetActive(false);
-        mainMenuPanel.SetActive(true);  // Ana menüyü tekrar göster
-    }
-
-    // --- OYUN FONKSÝYONLARI ---
-
-    public void PlayGame()
-    {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.currentLevelIndex = 1;
-        }
-
-        // Build Settings'deki sýraya göre 1. sahneyi yükler
-        SceneManager.LoadScene(1);
+        creditsPanel.SetActive(true);
     }
 
     public void QuitGame()
     {
-        Debug.Log("Oyundan Çýkýldý!");
+        Debug.Log("Çýkýþ yapýlýyor...");
         Application.Quit();
+    }
+
+    public void BackToMainMenu()
+    {
+        settingsPanel.SetActive(false);
+        creditsPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
     }
 }
