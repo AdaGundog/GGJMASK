@@ -80,8 +80,20 @@ public class TilemapPainter : MonoBehaviour
     void TogglePaintMode()
     {
         isPaintingMode = !isPaintingMode;
-        if (isPaintingMode) Cursor.SetCursor(brushCursor, cursorHotspot, CursorMode.Auto);
-        else Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+
+        if (isPaintingMode)
+        {
+            // Boyama modu imleci
+            Cursor.SetCursor(brushCursor, cursorHotspot, CursorMode.Auto);
+        }
+        else
+        {
+            // Boyama modundan çıkınca genel CursorManager'ı devreye sok
+            if (CursorManager.Instance != null)
+                CursorManager.Instance.ResetToDefault();
+            else
+                Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+        }
     }
 
     void Paint()

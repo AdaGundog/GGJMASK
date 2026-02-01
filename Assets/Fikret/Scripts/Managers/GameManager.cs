@@ -17,14 +17,15 @@ public class VeteranData
 {
     public EnemyType type;
     public int rank;
+    public string unitName; // Karakterin adını burada tutacağız
 
-    public VeteranData(EnemyType t, int r)
+    public VeteranData(EnemyType t, int r, string n)
     {
         type = t;
         rank = r;
+        unitName = n;
     }
 }
-
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
@@ -116,18 +117,19 @@ public class GameManager : MonoBehaviour
 
             if (baseUnit != null && reg != null)
             {
-                // --- RÜTBE ATLATMA BURADA GERÇEKLEŞİYOR ---
+                // RÜTBE ATLATMA
                 if (baseUnit.currentRank < 3)
                 {
                     baseUnit.currentRank++;
-                    // Not: Görseli burada UpdateRankVisuals ile güncellemeye gerek yok 
-                    // çünkü sahne hemen sonra kapanacak. Önemli olan veriyi (rank) artırmak.
                 }
 
-                // Artmış olan yeni rütbeyi "VeteranData" olarak kaydediyoruz
-                veterans.Add(new VeteranData((EnemyType)reg.unitType, baseUnit.currentRank));
+                // Artık ismiyle beraber kaydediyoruz
+                // Not: Eğer birimin Inspector'da yazdığın bir adı varsa 'baseUnit.unitFullName' kullan
+                string nameToSave = string.IsNullOrEmpty(baseUnit.unitFullName) ? unit.name : baseUnit.unitFullName;
 
-                Debug.Log($"{unit.name} gazi olarak kaydedildi. Yeni Rütbe: {baseUnit.currentRank}");
+                veterans.Add(new VeteranData((EnemyType)reg.unitType, baseUnit.currentRank, nameToSave));
+
+                Debug.Log($"{nameToSave} gazi olarak kaydedildi. Yeni Rütbe: {baseUnit.currentRank}");
             }
         }
     }

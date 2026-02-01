@@ -124,8 +124,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0.57}
-  m_SizeDelta: {x: 1, y: 0.2}
+  m_AnchoredPosition: {x: 0, y: 0.4492}
+  m_SizeDelta: {x: 1, y: 0.0984}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &2042045568241678290
 Canvas:
@@ -308,7 +308,7 @@ MonoBehaviour:
   rank2Sprite: {fileID: 21300000, guid: 552609d7b6a3fa04c8dd21c371499765, type: 3}
   rank3Sprite: {fileID: 21300000, guid: 79a985b7e9ffdb144b5b314a94366403, type: 3}
   unitFullName: 
-  hpBonusPerRank: 20
+  hpBonusPerRank: 2
   damageMultiplierPerRank: 0.2
   tankinessPerRank: 0.1
   arrowPrefab: {fileID: 6815061548058876008, guid: dfb3521baba36b64b9f9694aea932d53, type: 3}
@@ -422,7 +422,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1, y: 0.2}
+  m_SizeDelta: {x: 1, y: 0.0984}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1479031727656972821
 CanvasRenderer:

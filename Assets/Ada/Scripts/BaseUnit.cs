@@ -53,13 +53,8 @@ public abstract class BaseUnit : MonoBehaviour
     }
     protected virtual void Start()
     {
-        // Eðer isim atanmamýþsa NamingSystem'dan çek
-        if (string.IsNullOrEmpty(unitFullName))
-        {
-            unitFullName = NamingSystem.Instance.GenerateRandomName();
-            gameObject.name = unitFullName; // Hierarchy'de de ismi deðiþsin
-        }
-
+        // 0.1 saniye sonra kontrol et (Böylece gazi verisi atanmýþ olur)
+        Invoke("CheckAndAssignName", 0.05f);
         UpdateRankVisuals();
     }
     public void TakeDamage(float amount, UnitType attackerType, int attackerRank)
@@ -125,6 +120,16 @@ public abstract class BaseUnit : MonoBehaviour
         // Her rütbe atladýðýnda caný %20, hasarý %10 artýr gibi:
         currentHealth += data.maxHealth * 0.2f;
         // Not: Saldýrý bonusu için TakeDamage'da rütbeyi de hesaba katabiliriz
+    }
+    private void CheckAndAssignName()
+    {
+        // Eðer gazi listesinden bir isim gelmemiþse (yani unitFullName hala boþsa) rastgele ver
+        if (string.IsNullOrEmpty(unitFullName))
+        {
+            unitFullName = NamingSystem.Instance.GenerateRandomName();
+        }
+
+        gameObject.name = unitFullName; // Hierarchy ismini her halükarda güncelle
     }
 
     public void UpdateRankVisuals()
