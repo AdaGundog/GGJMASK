@@ -1,52 +1,70 @@
 using UnityEngine;
-using UnityEngine.EventSystems; // Mouse olaylarý için þart
+using UnityEngine.EventSystems;
+using UnityEngine.Audio; // Mixer Grubu tanýmlamak için bu þart!
 
+[RequireComponent(typeof(AudioSource))]
 public class UIHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
-    [Header("Ayarlar")]
-    public float hoverScale = 1.1f;   // Üzerine gelince ne kadar büyüsün? (%10)
-    public float clickScale = 0.95f;  // Týklayýnca ne kadar küçülsün?
-    public float speed = 10f;         // Animasyon hýzý
+    [Header("Mixer Ayarý (Önemli!)")]
+    public AudioMixerGroup sfxGroup; // Inspector'da buraya SFX grubunu sürükleyeceksin
+
+    [Header("Görsel Ayarlar")]
+    public float hoverScale = 1.1f;
+    public float clickScale = 0.95f;
+    public float speed = 10f;
+
+    [Header("Ses Dosyalarý")]
+    public AudioClip hoverSound;
+    public AudioClip clickSound;
 
     private Vector3 originalScale;
     private Vector3 targetScale;
+    private bool isHovered = false;
+    private AudioSource myAudioSource;
 
     private void Start()
     {
         originalScale = transform.localScale;
         targetScale = originalScale;
+
+        myAudioSource = GetComponent<AudioSource>();
+        myAudioSource.playOnAwake = false;
+        myAudioSource.spatialBlend = 0;
+
+        // --- ÝÞTE SÝHÝRLÝ KOD BURASI ---
+        // Eðer Inspector'dan bir grup seçtiysen, AudioSource'u o gruba baðlar.
+        if (sfxGroup != null)
+        {
+            myAudioSource.outputAudioMixerGroup = sfxGroup;
+        }
     }
 
     private void Update()
     {
-        // Yumuþak geçiþ (Lerp) ile boyutu deðiþtir
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.unscaledDeltaTime * speed);
     }
 
-    // Mouse üzerine gelince
     public void OnPointerEnter(PointerEventData eventData)
     {
+        isHovered = true;
         targetScale = originalScale * hoverScale;
-
-        // Ses çalmak istersen buraya ekleyebilirsin:
-        // AudioManager.Instance.PlaySFX("Hover_Sound");
+        if (hoverSound != null) myAudioSource.PlayOneShot(hoverSound);
     }
 
-    // Mouse üzerinden gidince
     public void OnPointerExit(PointerEventData eventData)
     {
+        isHovered = false;
         targetScale = originalScale;
     }
 
-    // Týklayýnca (Basýlý tutunca)
     public void OnPointerDown(PointerEventData eventData)
     {
         targetScale = originalScale * clickScale;
+        if (clickSound != null) myAudioSource.PlayOneShot(clickSound);
     }
 
-    // Týklamayý býrakýnca
     public void OnPointerUp(PointerEventData eventData)
     {
-        targetScale = originalScale; // Veya hoverScale'e dönebilirsin
+        targetScale = isHovered ? (originalScale * hoverScale) : originalScale;
     }
 }

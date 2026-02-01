@@ -59,7 +59,27 @@ public class GameManager : MonoBehaviour
         CurrentState = GameState.Preparation;
         CurrentMoney = startingMoney;
     }
+    // GameManager.cs içine ekle:
 
+    public void ResetGameData()
+    {
+        // 1. Oyun Durumunu "Hazırlık" Moduna Çek
+        CurrentState = GameState.Preparation;
+
+        // 2. Parayı Sıfırla (Başlangıç parası neyse onu yaz, örn: 100)
+        CurrentMoney = startingMoney;
+
+        // 3. Eski Gazileri Sil (Yoksa önceki oyundan kalanlar tekrar doğar)
+        veterans.Clear();
+
+        // 4. Bölüm Sayacını Sıfırla
+        currentLevelIndex = 1;
+
+        // 5. Zamanı Düzelt (Eğer Pause modunda çıktıysan zaman donuk kalmış olabilir!)
+        Time.timeScale = 1f;
+
+        Debug.Log("GameManager verileri sıfırlandı. Yeni oyuna hazır.");
+    }
     public void LevelCompleted()
     {
         Debug.Log("🎉 LEVEL TAMAMLANDI!");

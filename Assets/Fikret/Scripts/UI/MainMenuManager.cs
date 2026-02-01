@@ -3,24 +3,65 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuManager : MonoBehaviour
 {
+    [Header("Paneller")]
+    public GameObject mainMenuPanel;
+    public GameObject settingsPanel;
+    public GameObject creditsPanel;
+
+    private void Start()
+    {
+        BackToMainMenu();
+
+        // Menü açýldýðýnda mouse imlecini görünür yap ve kilidini aç (Garanti olsun)
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
+
     public void PlayGame()
     {
-        // GameManager yaþýyorsa onu sýfýrla ki Level 1'den baþlasýn
+        // --- KRÝTÝK NOKTA BURASI ---
+        // Eðer GameManager yaþýyorsa (ki DontDestroy olduðu için yaþýyordur),
+        // ona "Hafýzaný temizle" emrini veriyoruz.
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.currentLevelIndex = 1;
-            // Diðer resetlemeler GameManager'ýn Start'ýnda veya Level yüklendiðinde yapýlýr
+            GameManager.Instance.ResetGameData();
+        }
+        else
+        {
+            // Eðer oyun ilk defa açýlýyorsa ve GameManager sahnede yoksa endiþelenme,
+            // Oyun sahnesine gidince GameManager kendi Awake fonksiyonunda zaten sýfýrdan kurulacak.
         }
 
-        // Oyun Sahnesini Yükle (Sahne adýn "GameLevel_1" ise onu yaz, deðilse Build Settings'den bak)
-        // Seninle "GameLevel1" veya benzeri bir isimde karar kýlmýþtýk.
-        // Eðer build settings'de index 1 ise direkt 1 de yazabilirsin.
+        // Þimdi tertemiz bir sayfayla oyuna girebiliriz
         SceneManager.LoadScene(1);
+    }
+
+    // ... Diðer panel fonksiyonlarýn (OpenSettings, QuitGame vs.) aynen kalsýn ...
+
+    public void OpenSettings()
+    {
+        mainMenuPanel.SetActive(false);
+        settingsPanel.SetActive(true);
+        creditsPanel.SetActive(false);
+    }
+
+    public void OpenCredits()
+    {
+        mainMenuPanel.SetActive(false);
+        settingsPanel.SetActive(false);
+        creditsPanel.SetActive(true);
     }
 
     public void QuitGame()
     {
-        Debug.Log("Oyundan Çýkýldý!");
+        Debug.Log("Çýkýþ yapýlýyor...");
         Application.Quit();
+    }
+
+    public void BackToMainMenu()
+    {
+        settingsPanel.SetActive(false);
+        creditsPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
     }
 }
