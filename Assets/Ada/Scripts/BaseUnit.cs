@@ -18,6 +18,10 @@ public abstract class BaseUnit : MonoBehaviour
     public BaseUnit target;
 
     [Header("Rank 4 Specials")]
+    public GameObject legendaryAura;
+    public float healthRegen = 2f;
+    public float legendaryPowerBonus = 10f; // 4. rütbeye geçince eklenecek sabit hasar
+    private bool isLegendaryPowerApplied = false;
     public TMPro.TextMeshProUGUI nameText;
     [Header("Rank System")]
     [Range(1, 4)]
