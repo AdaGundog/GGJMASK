@@ -195,6 +195,7 @@ MonoBehaviour:
   rank1Sprite: {fileID: 21300000, guid: c6018daec0678e24691353c701a925af, type: 3}
   rank2Sprite: {fileID: 21300000, guid: 552609d7b6a3fa04c8dd21c371499765, type: 3}
   rank3Sprite: {fileID: 21300000, guid: 79a985b7e9ffdb144b5b314a94366403, type: 3}
+  rank4Sprite: {fileID: 21300000, guid: 3dbbf2178fb94de47b10f48fb2e0392e, type: 3}
   unitFullName: 
   hpBonusPerRank: 3
   damageMultiplierPerRank: 0.2

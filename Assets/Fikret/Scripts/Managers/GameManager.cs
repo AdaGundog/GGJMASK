@@ -64,25 +64,19 @@ public class GameManager : MonoBehaviour
     // --- YENİ: LEVEL BİTİRME FONKSİYONU ---
     public void LevelCompleted()
     {
-        Debug.Log("🎉 LEVEL TAMAMLANDI! Sonraki level yükleniyor...");
-
-        // 1. Level sayısını artır
+        Debug.Log("🎉 LEVEL TAMAMLANDI!");
         currentLevelIndex++;
-
-        // 2. Modu Hazırlığa çek
         CurrentState = GameState.Preparation;
 
-        // 3. Parayı Sıfırla (Her bölüm yeniden 500 altın verelim)
-        CurrentMoney = startingMoney;
+        // --- BU SATIRI SİLDİK VEYA YORUMA ALDIK ---
+        // CurrentMoney = startingMoney; 
 
-        // 4. Listeleri Temizle
+        // Listeleri temizle ve sahneyi yeniden yükle
         if (UnitManager.Instance != null)
         {
             UnitManager.Instance.activePlayerUnits.Clear();
             UnitManager.Instance.activeEnemyUnits.Clear();
         }
-
-        // 5. Sahneyi Yeniden Yükle (Aynı sahne ama LevelLoader yeni dosyayı okuyacak)
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -93,6 +87,13 @@ public class GameManager : MonoBehaviour
         CurrentState = GameState.Battle;
         Debug.Log("SAVAŞ BAŞLADI! ⚔️");
         OnBattleStarted?.Invoke();
+    }
+
+    public void AddMoney(int amount)
+    {
+        CurrentMoney += amount;
+        // UI'daki yazıların (Text) güncellenmesi için event'i tetikle
+        OnMoneyChanged?.Invoke(CurrentMoney);
     }
 
     public bool SpendMoney(int amount)
@@ -118,7 +119,7 @@ public class GameManager : MonoBehaviour
             if (baseUnit != null && reg != null)
             {
                 // RÜTBE ATLATMA
-                if (baseUnit.currentRank < 3)
+                if (baseUnit.currentRank < 4) // Sınırı 4'e çektik
                 {
                     baseUnit.currentRank++;
                 }

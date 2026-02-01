@@ -44,7 +44,12 @@ public class TilemapPainter : MonoBehaviour
     void Start()
     {
         if (mainCamera == null) mainCamera = Camera.main;
-        // Artik inkAmount'u GameManager'dan aliyoruz, burada set etmiyoruz
+
+        // Sahne ilk açıldığında GameManager'ı bulmaya çalış
+        if (gameManager == null)
+        {
+            gameManager = Object.FindFirstObjectByType<GameManager>();
+        }
     }
 
     void Update()
@@ -52,21 +57,22 @@ public class TilemapPainter : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.B))
         {
             TogglePaintMode();
-            Debug.Log($"[TilemapPainter] Paint Mode: {isPaintingMode}");
         }
 
-        // GameManager'dan ink kontrolu
         if (isPaintingMode && Input.GetMouseButton(0))
         {
+            // --- HATA VEREN KISMI BÖYLE GÜNCELLE ---
+            // Eğer referans hala boşsa, Singleton (Instance) üzerinden son kez dene
+            if (gameManager == null) gameManager = GameManager.Instance;
+
             if (gameManager == null)
             {
-                Debug.LogError("[TilemapPainter] GameManager referansi atanmamis!");
+                // Eğer hala bulamadıysa (GameManager objesi sahnede yoksa) hata ver ama Update'i durdur
                 return;
             }
 
             if (gameManager.CurrentMoney <= 0)
             {
-                Debug.LogWarning($"[TilemapPainter] Para yok! Mevcut: {gameManager.CurrentMoney}");
                 return;
             }
 
