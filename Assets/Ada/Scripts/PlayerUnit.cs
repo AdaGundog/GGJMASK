@@ -134,16 +134,26 @@ public class PlayerUnit : BaseUnit
     {
         if (Time.time >= lastAttackTime + data.attackRate)
         {
-            if (data.type == UnitType.Archer)
+            // 1. TOPLAM HASARI HESAPLA
+            // BaseUnit'ten gelen zoneDamageModifier'ı buraya ekliyoruz
+            float totalDamage = data.attackDamage + zoneDamageModifier;
+
+            // 2. SALDIRI TİPİNE GÖRE HASARI GÖNDER
+            if (data.type == UnitType.Archer && arrowPrefab != null)
             {
                 GameObject arrowObj = Instantiate(arrowPrefab, transform.position, Quaternion.identity);
-                arrowObj.GetComponent<Projectile>().Setup(target, data.attackDamage, data.type, currentRank);
+                // Ok projesine toplam hasarı gönderiyoruz
+                arrowObj.GetComponent<Projectile>().Setup(target, totalDamage, data.type, currentRank);
             }
             else
             {
+                // Yakın dövüş saldırısı (Görsel efekt ve hasar verme)
                 if (spearTransform != null) StartCoroutine(SpearPokeRoutine());
-                target.TakeDamage(data.attackDamage, data.type, currentRank);
+
+                // Hedefe hesapladığımız totalDamage'ı iletiyoruz
+                target.TakeDamage(totalDamage, data.type, currentRank);
             }
+
             lastAttackTime = Time.time;
         }
     }

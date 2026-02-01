@@ -1,0 +1,168 @@
+{
+    "levelName": "Level_5",
+    "startingInkAmount": 100.0,
+    "enemies": [
+        {
+            "type": 0,
+            "position": {
+                "x": 5.0,
+                "y": -1.0
+            }
+        },
+        {
+            "type": 0,
+            "position": {
+                "x": 5.0,
+                "y": 0.0
+            }
+        },
+        {
+            "type": 0,
+            "position": {
+                "x": 5.0,
+                "y": 2.0
+            }
+        },
+        {
+            "type": 0,
+            "position": {
+                "x": 5.0,
+                "y": 4.0
+            }
+        },
+        {
+            "type": 0,
+            "position": {
+                "x": 5.0,
+                "y": 1.0
+            }
+        },
+        {
+            "type": 1,
+            "position": {
+                "x": 8.0,
+                "y": -4.0
+            }
+        },
+        {
+            "type": 1,
+            "position": {
+                "x": 7.0,
+                "y": -2.0
+            }
+        },
+        {
+            "type": 1,
+            "position": {
+                "x": 10.0,
+                "y": 0.0
+            }
+        },
+        {
+            "type": 1,
+            "position": {
+                "x": 11.0,
+                "y": 2.0
+            }
+        },
+        {
+            "type": 1,
+            "position": {
+                "x": 9.0,
+                "y": 5.0
+            }
+        },
+        {
+            "type": 1,
+            "position": {
+                "x": 8.0,
+                "y": 6.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": 7.0,
+                "y": -8.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": 4.0,
+                "y": 8.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": 4.0,
+                "y": 8.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": 3.000000238418579,
+                "y": 8.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": -9.0,
+                "y": 2.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": -9.0,
+                "y": 1.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": -9.0,
+                "y": -1.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": -8.0,
+                "y": -4.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": -8.0,
+                "y": -4.0
+            }
+        },
+        {
+            "type": 2,
+            "position": {
+                "x": -8.0,
+                "y": 3.0
+            }
+        }
+    ],
+    "levelStartBonus": 1000
+}
